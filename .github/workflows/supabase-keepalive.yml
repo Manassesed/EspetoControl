@@ -1,0 +1,21 @@
+name: Supabase Keep-Alive
+
+on:
+  schedule:
+    - cron: '0 12 */3 * *' # every 3 days at noon UTC
+  workflow_dispatch: # allow manual trigger
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://hszxiirgicrbfommrdty.supabase.co/auth/v1/health")
+          echo "Status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "Supabase nao respondeu corretamente (status $STATUS)"
+            exit 1
+          fi
+          echo "Supabase online!"
