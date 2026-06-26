@@ -22,8 +22,8 @@ export type DayBucket = {
   count: number;
 };
 
-export function useReport(empresaId: string | undefined, period: ReportPeriod) {
-  const range = rangeFor(period);
+export function useReport(empresaId: string | undefined, period: ReportPeriod, referenceDate: Date = new Date()) {
+  const range = rangeFor(period, referenceDate);
 
   return useQuery({
     queryKey: ["report", empresaId, period, range.start, range.end],

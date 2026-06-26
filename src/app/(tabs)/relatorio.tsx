@@ -4,6 +4,7 @@ import { Redirect } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
+import { CalendarModal } from "@/components/CalendarModal";
 import { Header } from "@/components/Header";
 import { AnimatedIconBadge } from "@/components/ui/AnimatedIconBadge";
 import { Button } from "@/components/ui/Button";
@@ -12,7 +13,7 @@ import { MetricCard } from "@/components/ui/MetricCard";
 import { Screen } from "@/components/ui/Screen";
 import { useAuth } from "@/context/AuthContext";
 import { useReport } from "@/hooks/useReport";
-import { dayKey, monthKey, type ReportPeriod } from "@/utils/date";
+import { addDays, addMonths, dayKey, monthKey, type ReportPeriod } from "@/utils/date";
 import { exportXlsx } from "@/utils/export";
 import { formatCurrency } from "@/utils/currency";
 import { PAYMENT_BAR_COLORS, paymentLabel } from "@/utils/payment";
@@ -32,8 +33,10 @@ function formatBarLabel(value: number) {
 export default function ReportScreen() {
   const { profile } = useAuth();
   const [period, setPeriod] = useState<ReportPeriod>("week");
+  const [referenceDate, setReferenceDate] = useState(new Date());
+  const [calendarVisible, setCalendarVisible] = useState(false);
   const [selectedBucket, setSelectedBucket] = useState<{ key: string; label: string } | null>(null);
-  const report = useReport(profile?.empresa_id, period);
+  const report = useReport(profile?.empresa_id, period, referenceDate);
   const data = report.data;
 
   const keyForBucket = period === "month" ? monthKey : dayKey;
@@ -70,9 +73,31 @@ export default function ReportScreen() {
   const maxDay = Math.max(...perDay.map((d) => Math.max(d.sales, d.expenses)), 1);
   const maxPayment = Math.max(...paymentRows.map(([, total]) => total), 1);
   const maxProduct = Math.max(...productRows.map((p) => p.total), 1);
+  const today = new Date();
+  const nextRef = period === "week" ? addDays(referenceDate, 7) : addMonths(referenceDate, 1);
+  const isCurrentPeriod = nextRef > today;
+
+  function goPrev() {
+    setSelectedBucket(null);
+    setReferenceDate(d => period === "week" ? addDays(d, -7) : addMonths(d, -1));
+  }
+  function goNext() {
+    if (!isCurrentPeriod) {
+      setSelectedBucket(null);
+      setReferenceDate(d => period === "week" ? addDays(d, 7) : addMonths(d, 1));
+    }
+  }
+
+  const fmtShort = (d: Date) => d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+  const periodNavLabel = data
+    ? period === "week"
+      ? `${fmtShort(data.startDate)} – ${fmtShort(data.endDate)}`
+      : referenceDate.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })
+    : "...";
+
   const periodLabel = selectedBucket
     ? selectedBucket.label
-    : period === "week" ? "Semana atual" : "Últimos 6 meses";
+    : period === "week" ? periodNavLabel : "Últimos 6 meses";
   const bestBucketLabel = period === "week" ? "Melhor dia" : "Melhor mês";
   const bestProduct = productRows[0];
   const expensePercent = totalSales > 0 ? (totalExpenses / totalSales) * 100 : 0;
@@ -135,6 +160,12 @@ export default function ReportScreen() {
 
   return (
     <Screen>
+      <CalendarModal
+        visible={calendarVisible}
+        selectedDate={referenceDate}
+        onSelect={(d) => { setReferenceDate(d); setSelectedBucket(null); }}
+        onClose={() => setCalendarVisible(false)}
+      />
       <Header title="Relatório" subtitle="O resultado do período, com exportação em Excel" />
 
       {report.isError ? (
@@ -191,6 +222,29 @@ export default function ReportScreen() {
           <AnimatedIconBadge icon="bar-chart-outline" size="sm" colors={["#A5B4FC", "#4F46E5", "#1E1B4B"]} />
         </View>
 
+        <View className="mt-3 flex-row items-center gap-2">
+          <Pressable
+            className="h-8 w-8 items-center justify-center rounded-xl bg-slate-100"
+            onPress={goPrev}
+          >
+            <Ionicons name="chevron-back" size={16} color="#0F172A" />
+          </Pressable>
+          <Pressable
+            className="flex-1 flex-row items-center justify-center gap-1.5 rounded-xl bg-slate-50 py-1.5"
+            onPress={() => setCalendarVisible(true)}
+          >
+            <Ionicons name="calendar-outline" size={13} color="#64748B" />
+            <Text className="text-[12px] font-semibold text-ink">{periodNavLabel}</Text>
+          </Pressable>
+          <Pressable
+            className={`h-8 w-8 items-center justify-center rounded-xl bg-slate-100 ${isCurrentPeriod ? "opacity-30" : ""}`}
+            onPress={goNext}
+            disabled={isCurrentPeriod}
+          >
+            <Ionicons name="chevron-forward" size={16} color="#0F172A" />
+          </Pressable>
+        </View>
+
         {report.isLoading ? (
           <View className="items-center py-10">
             <Ionicons name="sync-outline" size={26} color="#94A3B8" />
@@ -201,7 +255,7 @@ export default function ReportScreen() {
             <View className="mt-3 flex-row items-center justify-between">
               <View className="flex-row items-center gap-3">
                 <View className="flex-row items-center gap-1.5">
-                  <View className="h-2.5 w-2.5 rounded-full bg-brand-300" />
+                  <View className="h-2.5 w-2.5 rounded-full bg-brand-500" />
                   <Text className="text-[11px] text-muted">Vendas</Text>
                 </View>
                 <View className="flex-row items-center gap-1.5">
@@ -247,7 +301,7 @@ export default function ReportScreen() {
                             </Text>
                           ) : null}
                           <View
-                            className={`w-4 rounded-t-lg ${isBest ? "bg-emerald-500" : "bg-brand-300"}`}
+                            className={`w-4 rounded-t-lg ${isBest ? "bg-emerald-500" : "bg-brand-500"}`}
                             style={{ height: `${salesH}%` }}
                           />
                         </View>
