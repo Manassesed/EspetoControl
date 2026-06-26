@@ -7,9 +7,9 @@ type EmptyStateProps = {
 
 export function EmptyState({ title, description }: EmptyStateProps) {
   return (
-    <View className="items-center rounded-lg border border-dashed border-line bg-white p-6">
-      <Text className="text-base font-bold text-ink">{title}</Text>
-      <Text className="mt-2 text-center text-sm text-muted">{description}</Text>
+    <View className="items-center rounded-xl border border-dashed border-line bg-white p-5">
+      <Text className="text-[14px] font-semibold text-ink">{title}</Text>
+      <Text className="mt-1.5 text-center text-[13px] text-muted">{description}</Text>
     </View>
   );
 }

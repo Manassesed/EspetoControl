@@ -27,7 +27,7 @@ export async function createSale(payload: CreateSalePayload) {
   });
 
   if (error) {
-    throw error;
+    throw new Error(error.message ?? JSON.stringify(error));
   }
 
   return venda;
@@ -43,10 +43,46 @@ export async function listTodaySales(empresaId: string, start: string, end: stri
     .order("created_at", { ascending: false });
 
   if (error) {
-    throw error;
+    throw new Error(error.message ?? JSON.stringify(error));
   }
 
   return data;
+}
+
+export async function deleteSale(saleId: string) {
+  const { error } = await supabase.from("vendas").delete().eq("id", saleId);
+  if (error) {
+    throw new Error(error.message ?? JSON.stringify(error));
+  }
+}
+
+export type SaleItemDetail = { produto_id: string; nome: string; quantidade: number; valor: number };
+
+export async function listSaleItems(saleIds: string[]): Promise<Record<string, SaleItemDetail[]>> {
+  if (!saleIds.length) return {};
+
+  const { data, error } = await supabase
+    .from("venda_itens")
+    .select("venda_id, produto_id, quantidade, valor, produtos(nome)")
+    .in("venda_id", saleIds);
+
+  if (error) {
+    throw new Error(error.message ?? JSON.stringify(error));
+  }
+
+  const rows = (data ?? []) as unknown as (SaleItemDetail & { venda_id: string; produtos: { nome: string } | null })[];
+
+  return rows.reduce<Record<string, SaleItemDetail[]>>((acc, row) => {
+    const list = acc[row.venda_id] ?? [];
+    list.push({
+      produto_id: row.produto_id,
+      nome: row.produtos?.nome ?? "Produto removido",
+      quantidade: row.quantidade,
+      valor: row.valor
+    });
+    acc[row.venda_id] = list;
+    return acc;
+  }, {});
 }
 
 export async function listTodayProductSales(empresaId: string, start: string, end: string): Promise<ProductSale[]> {
@@ -58,7 +94,7 @@ export async function listTodayProductSales(empresaId: string, start: string, en
     .lte("vendas.created_at", end);
 
   if (error) {
-    throw error;
+    throw new Error(error.message ?? JSON.stringify(error));
   }
 
   const rows = (data ?? []) as unknown as SaleItemRow[];

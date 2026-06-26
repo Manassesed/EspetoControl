@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { demoProducts, isDemoCompany } from "@/constants/demo";
 import type { ProductForm } from "@/lib/schemas";
-import { createProduct, listProducts, toggleProduct, updateProduct } from "@/services/productService";
+import { createProduct, deleteProduct, listProducts, toggleProduct, updateProduct } from "@/services/productService";
 
 export function useProducts(empresaId?: string, onlyActive = false) {
   return useQuery({
@@ -45,5 +45,11 @@ export function useProductMutations(empresaId?: string) {
     onSuccess: invalidate
   });
 
-  return { create, update, toggle };
+  const remove = useMutation({
+    mutationFn: ({ id }: { id: string }) =>
+      isDemoCompany(empresaId) ? Promise.resolve() : deleteProduct(empresaId!, id),
+    onSuccess: invalidate
+  });
+
+  return { create, update, toggle, remove };
 }

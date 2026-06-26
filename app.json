@@ -10,7 +10,7 @@
       "backgroundColor": "#F8FAFC"
     },
     "assetBundlePatterns": [
-      "**/*"
+      "src/assets/**"
     ],
     "ios": {
       "supportsTablet": false
@@ -23,7 +23,11 @@
       "expo-router",
       "expo-secure-store",
       "expo-asset",
-      "expo-font"
+      ["expo-font", {
+        "fonts": [
+          "./node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf"
+        ]
+      }]
     ],
     "experiments": {
       "typedRoutes": true

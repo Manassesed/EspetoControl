@@ -1,12 +1,17 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { isDemoCompany } from "@/constants/demo";
-import { createSale } from "@/services/saleService";
+import { createSale, deleteSale } from "@/services/saleService";
 import type { PaymentMethod } from "@/types/database";
 import type { CartItem } from "@/store/saleStore";
 
 export function useSaleMutations(empresaId?: string, usuarioId?: string) {
   const queryClient = useQueryClient();
+
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ["dashboard", empresaId] });
+    queryClient.invalidateQueries({ queryKey: ["report", empresaId] });
+  };
 
   const create = useMutation({
     mutationFn: (payload: { formaPagamento: PaymentMethod; items: CartItem[]; total: number }) =>
@@ -23,10 +28,13 @@ export function useSaleMutations(empresaId?: string, usuarioId?: string) {
             formaPagamento: payload.formaPagamento,
             items: payload.items
           }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["dashboard", empresaId] });
-    }
+    onSuccess: invalidate
   });
 
-  return { create };
+  const remove = useMutation({
+    mutationFn: (saleId: string) => (isDemoCompany(empresaId) ? Promise.resolve() : deleteSale(saleId)),
+    onSuccess: invalidate
+  });
+
+  return { create, remove };
 }

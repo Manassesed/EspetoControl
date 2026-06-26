@@ -18,5 +18,5 @@ export const spacing = {
 export const paymentMethods = [
   { label: "PIX", value: "pix" },
   { label: "Dinheiro", value: "dinheiro" },
-  { label: "Cartao", value: "cartao" }
+  { label: "Cartão", value: "cartao" }
 ] as const;

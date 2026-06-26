@@ -34,6 +34,10 @@ No painel do Supabase:
 1. Abra `SQL Editor`.
 2. Cole todo o conteudo de `supabase/schema.sql`.
 3. Execute o script.
+4. Depois, execute na ordem cada arquivo de `supabase/migrations/` (0001, 0002, ...).
+   O `0002_team_roles.sql` cria a aba "Minha equipe": papel (gerente/colaborador),
+   status (pendente/ativo/inativo) e as regras de RLS que escondem dados
+   financeiros de colaboradores no banco, não só na tela.
 
 Esse script cria:
 
@@ -54,6 +58,22 @@ Para o cadastro funcionar diretamente pelo app neste MVP:
 2. Desative a confirmacao obrigatoria de email.
 
 Se a confirmacao de email ficar ativa, o usuario precisara confirmar o email antes de o app criar o perfil/empresa.
+
+## 4.1 Publicar a Edge Function de convite (obrigatório para "Minha equipe")
+
+Convidar alguém por email exige a Admin API do Supabase, que só pode rodar no
+servidor (a `service_role` key nunca pode ir para o app). Por isso existe
+`supabase/functions/invite-member`.
+
+1. Instale a Supabase CLI e faça login (`supabase login`).
+2. Vincule o projeto: `supabase link --project-ref <seu-project-ref>`.
+3. Publique a função: `supabase functions deploy invite-member`.
+4. Em `Authentication > URL Configuration`, configure a `Site URL` para a URL
+   onde o app web fica publicado (ex: `https://espetocontrol.vercel.app`) e
+   adicione `espetocontrol://` na lista de Redirect URLs (necessário para o
+   link de convite abrir o app nativo).
+
+Sem isso, o botão "Convidar" na aba Equipe retorna erro.
 
 ## 5. Como testar gravacao real
 

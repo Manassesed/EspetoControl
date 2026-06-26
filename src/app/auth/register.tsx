@@ -1,7 +1,8 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Ionicons } from "@expo/vector-icons";
+﻿import { zodResolver } from "@hookform/resolvers/zod";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link, router } from "expo-router";
+import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, KeyboardAvoidingView, Platform, Text, View } from "react-native";
 
@@ -16,11 +17,17 @@ import { type RegisterForm, registerSchema } from "@/lib/schemas";
 
 export default function RegisterScreen() {
   const { register } = useAuthActions();
-  const { startDemo } = useAuth();
+  const { startDemo, session, demoMode } = useAuth();
   const form = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
     defaultValues: { nome: "", empresa: "", email: "", password: "" }
   });
+
+  useEffect(() => {
+    if (session || demoMode) {
+      router.replace("/(tabs)");
+    }
+  }, [session, demoMode]);
 
   async function onSubmit(data: RegisterForm) {
     try {
@@ -32,10 +39,7 @@ export default function RegisterScreen() {
           "Enviamos um link de confirmacao para seu email. Toque no link recebido e depois faca login no app."
         );
         router.replace("/auth/login");
-        return;
       }
-
-      router.replace("/(tabs)");
     } catch (error) {
       Alert.alert("Nao foi possivel cadastrar", error instanceof Error ? error.message : "Tente novamente.");
     }
@@ -43,7 +47,6 @@ export default function RegisterScreen() {
 
   function openDemo() {
     startDemo();
-    router.replace("/(tabs)");
   }
 
   return (
@@ -53,13 +56,13 @@ export default function RegisterScreen() {
           colors={["#0F172A", "#065F46", "#10B981"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          className="mb-6 rounded-3xl p-6 shadow-sm"
+          className="mb-6 rounded-2xl p-5"
         >
-          <View className="mb-5">
-            <AnimatedIconBadge icon="storefront-outline" size="lg" colors={["#A7F3D0", "#10B981", "#064E3B"]} />
+          <View className="mb-4">
+            <AnimatedIconBadge icon="storefront-outline" size="md" colors={["#A7F3D0", "#10B981", "#064E3B"]} />
           </View>
-          <Text className="text-3xl font-black text-white">Criar conta</Text>
-          <Text className="mt-2 text-base text-slate-300">Configure sua empresa e comece a vender hoje.</Text>
+          <Text className="text-[24px] font-bold tracking-tight text-white">Criar conta</Text>
+          <Text className="mt-1.5 text-[14px] text-slate-300">Configure sua empresa e comece a vender hoje.</Text>
         </LinearGradient>
 
         <View className="gap-4">
@@ -111,7 +114,7 @@ export default function RegisterScreen() {
           ) : null}
 
           <Link href="/auth/login" asChild>
-            <Text className="py-3 text-center font-bold text-brand-700">Ja tenho conta</Text>
+            <Text className="py-2.5 text-center text-[14px] font-semibold text-brand-700">Ja tenho conta</Text>
           </Link>
         </View>
       </KeyboardAvoidingView>

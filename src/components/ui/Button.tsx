@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+﻿import Ionicons from "@expo/vector-icons/Ionicons";
 import { ActivityIndicator, Text, View, type PressableProps } from "react-native";
 
 import { AnimatedPressable } from "@/components/ui/AnimatedPressable";
@@ -34,7 +34,7 @@ const iconColors = {
 export function Button({ title, loading, icon, variant = "primary", disabled, className = "", ...props }: ButtonProps) {
   return (
     <AnimatedPressable
-      className={`h-14 flex-row items-center justify-center rounded-lg px-5 shadow-sm ${variants[variant]} ${
+      className={`h-12 flex-row items-center justify-center rounded-xl px-5 ${variants[variant]} ${
         disabled || loading ? "opacity-60" : "opacity-100"
       } ${className}`}
       disabled={disabled || loading}
@@ -44,8 +44,8 @@ export function Button({ title, loading, icon, variant = "primary", disabled, cl
         <ActivityIndicator color={iconColors[variant]} />
       ) : (
         <View className="flex-row items-center gap-2">
-          {icon ? <Ionicons name={icon} size={19} color={iconColors[variant]} /> : null}
-          <Text className={`text-base font-bold ${textVariants[variant]}`}>{title}</Text>
+          {icon ? <Ionicons name={icon} size={17} color={iconColors[variant]} /> : null}
+          <Text className={`text-[14px] font-semibold ${textVariants[variant]}`}>{title}</Text>
         </View>
       )}
     </AnimatedPressable>

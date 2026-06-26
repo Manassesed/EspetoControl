@@ -18,9 +18,13 @@ create table if not exists public.produtos (
   empresa_id uuid not null references public.empresas(id) on delete cascade,
   nome text not null,
   preco numeric(12, 2) not null check (preco >= 0),
+  custo numeric(12, 2) not null default 0 check (custo >= 0),
   categoria text not null,
   ativo boolean not null default true
 );
+
+-- Para bancos já existentes (executar uma vez):
+-- alter table public.produtos add column if not exists custo numeric(12, 2) not null default 0 check (custo >= 0);
 
 create table if not exists public.vendas (
   id uuid primary key default gen_random_uuid(),

@@ -1,4 +1,4 @@
-export type PaymentMethod = "pix" | "dinheiro" | "cartao";
+export type PaymentMethod = "pix" | "dinheiro" | "cartao_credito" | "cartao_debito";
 
 export type Empresa = {
   id: string;
@@ -6,11 +6,18 @@ export type Empresa = {
   created_at: string;
 };
 
+export type AccessRole = "gerente" | "colaborador";
+export type MemberStatus = "pendente" | "ativo" | "inativo";
+
 export type Usuario = {
   id: string;
   empresa_id: string;
   nome: string;
   email: string;
+  role: AccessRole;
+  status: MemberStatus;
+  convidado_por: string | null;
+  created_at: string;
 };
 
 export type Produto = {
@@ -18,6 +25,8 @@ export type Produto = {
   empresa_id: string;
   nome: string;
   preco: number;
+  /** Custo unitário do produto. Opcional para compatibilidade com registros antigos. */
+  custo?: number;
   categoria: string;
   ativo: boolean;
 };
@@ -67,7 +76,8 @@ export type Database = {
       };
       usuarios: {
         Row: Usuario;
-        Insert: Usuario;
+        Insert: Omit<Usuario, "role" | "status" | "convidado_por" | "created_at"> &
+          Partial<Pick<Usuario, "role" | "status" | "convidado_por" | "created_at">>;
         Update: Partial<Usuario>;
         Relationships: [
           {
@@ -154,6 +164,26 @@ export type Database = {
           p_nome: string;
           p_empresa: string;
           p_email: string;
+        };
+        Returns: Usuario;
+      };
+      accept_invite_profile: {
+        Args: {
+          p_nome: string;
+        };
+        Returns: Usuario;
+      };
+      update_member_role: {
+        Args: {
+          p_user_id: string;
+          p_role: AccessRole;
+        };
+        Returns: Usuario;
+      };
+      update_member_status: {
+        Args: {
+          p_user_id: string;
+          p_status: "ativo" | "inativo";
         };
         Returns: Usuario;
       };

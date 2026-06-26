@@ -7,8 +7,26 @@ export const demoProfile: Usuario = {
   id: DEMO_USER_ID,
   empresa_id: DEMO_EMPRESA_ID,
   nome: "Atendente Demo",
-  email: "demo@espetocontrol.app"
+  email: "demo@espetocontrol.app",
+  role: "gerente",
+  status: "ativo",
+  convidado_por: null,
+  created_at: new Date().toISOString()
 };
+
+export const demoTeam: Usuario[] = [
+  demoProfile,
+  {
+    id: "demo-colaborador-1",
+    empresa_id: DEMO_EMPRESA_ID,
+    nome: "Colaborador Demo",
+    email: "colaborador@espetocontrol.app",
+    role: "colaborador",
+    status: "ativo",
+    convidado_por: DEMO_USER_ID,
+    created_at: new Date().toISOString()
+  }
+];
 
 export const demoProducts: Produto[] = [
   {
@@ -17,6 +35,7 @@ export const demoProducts: Produto[] = [
     nome: "Espetinho bovino",
     categoria: "Espetos",
     preco: 9,
+    custo: 4,
     ativo: true
   },
   {
@@ -25,6 +44,7 @@ export const demoProducts: Produto[] = [
     nome: "Espetinho frango",
     categoria: "Espetos",
     preco: 8,
+    custo: 3.5,
     ativo: true
   },
   {
@@ -33,6 +53,7 @@ export const demoProducts: Produto[] = [
     nome: "Refrigerante lata",
     categoria: "Bebidas",
     preco: 6,
+    custo: 4,
     ativo: true
   }
 ];
@@ -59,7 +80,7 @@ export const demoSales: Venda[] = [
     empresa_id: DEMO_EMPRESA_ID,
     usuario_id: DEMO_USER_ID,
     valor_total: 36,
-    forma_pagamento: "cartao",
+    forma_pagamento: "cartao_credito",
     created_at: new Date().toISOString()
   }
 ];
@@ -112,22 +133,28 @@ export const demoSaleDetails = [
     id: "demo-venda-1",
     label: "Venda #1024",
     items: "6x bovino, 3x refri",
+    itemsDetail: [{ produto_id: "demo-produto-1", nome: "Espetinho bovino", quantidade: 6, valor: 54 }],
     forma_pagamento: "pix",
-    valor_total: 72
+    valor_total: 72,
+    usuario_id: DEMO_USER_ID
   },
   {
     id: "demo-venda-2",
     label: "Venda #1023",
     items: "4x frango, 2x bovino",
+    itemsDetail: [{ produto_id: "demo-produto-2", nome: "Espetinho frango", quantidade: 4, valor: 32 }],
     forma_pagamento: "dinheiro",
-    valor_total: 48
+    valor_total: 48,
+    usuario_id: DEMO_USER_ID
   },
   {
     id: "demo-venda-3",
     label: "Venda #1022",
     items: "4x bovino",
-    forma_pagamento: "cartao",
-    valor_total: 36
+    itemsDetail: [{ produto_id: "demo-produto-1", nome: "Espetinho bovino", quantidade: 4, valor: 36 }],
+    forma_pagamento: "cartao_credito",
+    valor_total: 36,
+    usuario_id: DEMO_USER_ID
   }
 ];
 

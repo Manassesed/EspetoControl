@@ -7,14 +7,14 @@ type InputProps = TextInputProps & {
 
 export function Input({ label, error, className = "", ...props }: InputProps) {
   return (
-    <View className="gap-2">
-      <Text className="text-sm font-semibold text-ink">{label}</Text>
+    <View className="gap-1.5">
+      <Text className="text-[13px] font-medium text-ink">{label}</Text>
       <TextInput
-        className={`h-14 rounded-lg border border-line bg-white px-4 text-base text-ink ${className}`}
+        className={`h-12 rounded-xl border border-line bg-white px-3.5 text-[14px] text-ink ${className}`}
         placeholderTextColor="#94A3B8"
         {...props}
       />
-      {error ? <Text className="text-sm text-danger">{error}</Text> : null}
+      {error ? <Text className="text-[12px] text-danger">{error}</Text> : null}
     </View>
   );
 }

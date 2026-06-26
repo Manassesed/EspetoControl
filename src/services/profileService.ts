@@ -1,43 +1,32 @@
 import { supabase } from "@/services/supabase";
 
-export async function getCurrentUserProfile() {
-  const { data: authData, error: authError } = await supabase.auth.getUser();
-
-  if (authError) {
-    throw authError;
-  }
-
-  if (!authData.user) {
-    return null;
-  }
-
+export async function loadProfileForUser(userId: string, email?: string, meta?: Record<string, unknown>) {
   const { data, error } = await supabase
     .from("usuarios")
     .select("*")
-    .eq("id", authData.user.id)
+    .eq("id", userId)
     .maybeSingle();
 
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
+  if (data) return data;
 
-  if (data) {
-    return data;
-  }
+  // profile doesn't exist yet — create it
+  const nome = typeof meta?.nome === "string" ? meta.nome : email?.split("@")[0] ?? "Usuario";
+  const empresa = typeof meta?.empresa === "string" ? meta.empresa : "Minha Empresa";
 
-  const metadata = authData.user.user_metadata;
-  const nome = typeof metadata.nome === "string" ? metadata.nome : authData.user.email?.split("@")[0] ?? "Usuario";
-  const empresa = typeof metadata.empresa === "string" ? metadata.empresa : "Minha empresa";
-
-  const { data: profile, error: profileError } = await supabase.rpc("create_initial_profile", {
+  const { data: profile, error: rpcError } = await supabase.rpc("create_initial_profile", {
     p_nome: nome,
     p_empresa: empresa,
-    p_email: authData.user.email ?? ""
+    p_email: email ?? ""
   });
 
-  if (profileError) {
-    throw profileError;
-  }
-
+  if (rpcError) throw rpcError;
   return profile;
+}
+
+export async function getCurrentUserProfile() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.user) return null;
+  const { user } = session;
+  return loadProfileForUser(user.id, user.email ?? undefined, user.user_metadata);
 }

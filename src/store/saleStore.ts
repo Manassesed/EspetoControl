@@ -34,6 +34,27 @@ export function useSaleCart() {
     );
   }
 
+  function setProductQuantity(produto: Produto, quantidade: number) {
+    const next = Math.max(0, Math.floor(quantidade));
+    setItems((current) => {
+      const existing = current.find((item) => item.produto.id === produto.id);
+
+      if (next <= 0) {
+        return current.filter((item) => item.produto.id !== produto.id);
+      }
+      if (existing) {
+        return current.map((item) =>
+          item.produto.id === produto.id ? { ...item, quantidade: next } : item
+        );
+      }
+      return [...current, { produto, quantidade: next }];
+    });
+  }
+
+  function removeProduct(produtoId: string) {
+    setItems((current) => current.filter((item) => item.produto.id !== produtoId));
+  }
+
   function clear() {
     setItems([]);
   }
@@ -43,5 +64,5 @@ export function useSaleCart() {
     [items]
   );
 
-  return { items, total, addProduct, decrementProduct, clear };
+  return { items, total, addProduct, decrementProduct, removeProduct, setProductQuantity, clear };
 }

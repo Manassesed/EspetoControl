@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+﻿import Ionicons from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect } from "react";
 import { View } from "react-native";
@@ -17,9 +17,9 @@ type AnimatedIconBadgeProps = {
 };
 
 const sizes = {
-  sm: { box: "h-9 w-9 rounded-2xl", icon: 17, glow: "h-6 w-6" },
-  md: { box: "h-11 w-11 rounded-2xl", icon: 21, glow: "h-8 w-8" },
-  lg: { box: "h-14 w-14 rounded-3xl", icon: 27, glow: "h-10 w-10" }
+  sm: { box: "h-8 w-8 rounded-xl", icon: 15, glow: "h-5 w-5" },
+  md: { box: "h-10 w-10 rounded-xl", icon: 18, glow: "h-7 w-7" },
+  lg: { box: "h-12 w-12 rounded-2xl", icon: 22, glow: "h-9 w-9" }
 };
 
 export function AnimatedIconBadge({

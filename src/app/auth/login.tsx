@@ -1,7 +1,8 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Ionicons } from "@expo/vector-icons";
+﻿import { zodResolver } from "@hookform/resolvers/zod";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link, router } from "expo-router";
+import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, KeyboardAvoidingView, Platform, Text, View } from "react-native";
 
@@ -16,24 +17,28 @@ import { type LoginForm, loginSchema } from "@/lib/schemas";
 
 export default function LoginScreen() {
   const { login } = useAuthActions();
-  const { startDemo } = useAuth();
+  const { startDemo, session, demoMode } = useAuth();
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" }
   });
 
+  useEffect(() => {
+    if (session || demoMode) {
+      router.replace("/(tabs)");
+    }
+  }, [session, demoMode]);
+
   async function onSubmit(data: LoginForm) {
     try {
       await login.mutateAsync(data);
-      router.replace("/(tabs)");
     } catch (error) {
-      Alert.alert("Nao foi possivel entrar", error instanceof Error ? error.message : "Tente novamente.");
+      Alert.alert("Nao foi possivel entrar", error instanceof Error ? error.message : "Verifique seu email e senha e tente novamente.");
     }
   }
 
   function openDemo() {
     startDemo();
-    router.replace("/(tabs)");
   }
 
   return (
@@ -43,17 +48,17 @@ export default function LoginScreen() {
           colors={["#0F172A", "#065F46", "#10B981"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          className="mb-8 rounded-3xl p-6 shadow-sm"
+          className="mb-7 rounded-2xl p-5"
         >
-          <View className="mb-5">
-            <AnimatedIconBadge icon="flame-outline" size="lg" colors={["#FDBA74", "#F97316", "#7C2D12"]} />
+          <View className="mb-4">
+            <AnimatedIconBadge icon="flame-outline" size="md" colors={["#FDBA74", "#F97316", "#7C2D12"]} />
           </View>
-          <Text className="text-4xl font-black text-white">EspetoControl</Text>
-          <Text className="mt-3 text-base text-slate-300">Vendas, gastos e lucro do dia em poucos toques.</Text>
-          <View className="mt-6 flex-row gap-2">
-            <View className="h-2 flex-1 rounded-full bg-brand-500" />
-            <View className="h-2 flex-[0.65] rounded-full bg-amber-400" />
-            <View className="h-2 flex-[0.45] rounded-full bg-sky-400" />
+          <Text className="text-[28px] font-bold tracking-tight text-white">EspetoControl</Text>
+          <Text className="mt-2 text-[14px] text-slate-300">Vendas, gastos e lucro do dia em poucos toques.</Text>
+          <View className="mt-5 flex-row gap-2">
+            <View className="h-1.5 flex-1 rounded-full bg-brand-500" />
+            <View className="h-1.5 flex-[0.65] rounded-full bg-amber-400" />
+            <View className="h-1.5 flex-[0.45] rounded-full bg-sky-400" />
           </View>
         </LinearGradient>
 
@@ -93,8 +98,9 @@ export default function LoginScreen() {
           ) : null}
 
           <Link href="/auth/register" asChild>
-            <Text className="py-3 text-center font-bold text-brand-700">Criar minha conta</Text>
+            <Text className="py-2.5 text-center text-[14px] font-semibold text-brand-700">Criar minha conta</Text>
           </Link>
+          <Text className="text-center text-[11px] text-muted">v1.3</Text>
         </View>
       </KeyboardAvoidingView>
     </Screen>
