@@ -11,10 +11,12 @@ type CalendarModalProps = {
   onClose: () => void;
 };
 
-const weekDayLabels = ["D", "S", "T", "Q", "Q", "S", "S"];
+// Seg Ter Qua Qui Sex Sáb Dom
+const weekDayLabels = ["S", "T", "Q", "Q", "S", "S", "D"];
 
 function buildMonthGrid(monthStart: Date) {
-  const firstWeekday = monthStart.getDay();
+  // Converte getDay() (0=Dom) para posição com semana iniciando na segunda (0=Seg)
+  const firstWeekday = (monthStart.getDay() + 6) % 7;
   const daysInMonth = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0).getDate();
 
   const cells: (Date | null)[] = [];

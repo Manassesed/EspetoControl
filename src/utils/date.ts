@@ -54,7 +54,7 @@ export function addMonths(date: Date, months: number) {
   return new Date(date.getFullYear(), date.getMonth() + months, 1);
 }
 
-/** "week" = últimos 7 dias. "month" = últimos 6 meses civis (Jan, Fev...), incluindo o mês atual. */
+/** "week" = semana atual (Seg–Dom). "month" = últimos 6 meses civis (Jan, Fev...), incluindo o mês atual. */
 export function rangeFor(period: ReportPeriod, reference: Date = new Date()) {
   if (period === "month") {
     const startDate = startOfMonth(addMonths(reference, -5));
@@ -67,8 +67,11 @@ export function rangeFor(period: ReportPeriod, reference: Date = new Date()) {
     };
   }
 
-  const startDate = startOfDay(addDays(reference, -6));
-  const endDate = endOfDay(reference);
+  // Sempre começa na segunda-feira da semana atual (0=Dom → recua 6 dias; 1=Seg → 0 dias, etc.)
+  const dow = reference.getDay();
+  const daysFromMonday = dow === 0 ? 6 : dow - 1;
+  const startDate = startOfDay(addDays(reference, -daysFromMonday));
+  const endDate = endOfDay(addDays(startDate, 6));
   return {
     startDate,
     endDate,

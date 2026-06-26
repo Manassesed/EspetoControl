@@ -72,7 +72,7 @@ export default function ReportScreen() {
   const maxProduct = Math.max(...productRows.map((p) => p.total), 1);
   const periodLabel = selectedBucket
     ? selectedBucket.label
-    : period === "week" ? "Últimos 7 dias" : "Últimos 6 meses";
+    : period === "week" ? "Semana atual" : "Últimos 6 meses";
   const bestBucketLabel = period === "week" ? "Melhor dia" : "Melhor mês";
   const bestProduct = productRows[0];
   const expensePercent = totalSales > 0 ? (totalExpenses / totalSales) * 100 : 0;
