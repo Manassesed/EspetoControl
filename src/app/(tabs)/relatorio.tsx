@@ -13,7 +13,7 @@ import { MetricCard } from "@/components/ui/MetricCard";
 import { Screen } from "@/components/ui/Screen";
 import { useAuth } from "@/context/AuthContext";
 import { useReport } from "@/hooks/useReport";
-import { addDays, addMonths, dayKey, monthKey, type ReportPeriod } from "@/utils/date";
+import { addDays, addMonths, dayKey, formatMonthYear, type ReportPeriod } from "@/utils/date";
 import { exportXlsx } from "@/utils/export";
 import { formatCurrency } from "@/utils/currency";
 import { PAYMENT_BAR_COLORS, paymentLabel } from "@/utils/payment";
@@ -39,7 +39,7 @@ export default function ReportScreen() {
   const report = useReport(profile?.empresa_id, period, referenceDate);
   const data = report.data;
 
-  const keyForBucket = period === "month" ? monthKey : dayKey;
+  const keyForBucket = dayKey;
 
   // Quando o usuário toca numa barra, os cards acima passam a refletir só aquele dia/mês.
   const filteredSales = selectedBucket
@@ -88,17 +88,15 @@ export default function ReportScreen() {
     }
   }
 
-  const fmtShort = (d: Date) => d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+  const fmtShort = (d: Date) => `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
   const periodNavLabel = data
     ? period === "week"
       ? `${fmtShort(data.startDate)} – ${fmtShort(data.endDate)}`
-      : referenceDate.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })
+      : formatMonthYear(referenceDate)
     : "...";
 
-  const periodLabel = selectedBucket
-    ? selectedBucket.label
-    : period === "week" ? periodNavLabel : "Últimos 6 meses";
-  const bestBucketLabel = period === "week" ? "Melhor dia" : "Melhor mês";
+  const periodLabel = selectedBucket ? selectedBucket.label : periodNavLabel;
+  const bestBucketLabel = "Melhor dia";
   const bestProduct = productRows[0];
   const expensePercent = totalSales > 0 ? (totalExpenses / totalSales) * 100 : 0;
 
@@ -337,6 +335,7 @@ export default function ReportScreen() {
                     onPress={() => {
                       setPeriod(p.value);
                       setSelectedBucket(null);
+                      setReferenceDate(new Date());
                     }}
                   >
                     <Text className={`text-[11px] font-semibold ${selected ? "text-white" : "text-muted"}`}>{p.label}</Text>

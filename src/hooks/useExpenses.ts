@@ -15,6 +15,7 @@ export function useExpenses(empresaId?: string) {
 export function useExpenseMutations(empresaId?: string) {
   const queryClient = useQueryClient();
 
+  
   const create = useMutation({
     mutationFn: async (data: ExpenseForm) => {
       if (isDemoCompany(empresaId)) return;

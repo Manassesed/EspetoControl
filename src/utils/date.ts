@@ -54,11 +54,11 @@ export function addMonths(date: Date, months: number) {
   return new Date(date.getFullYear(), date.getMonth() + months, 1);
 }
 
-/** "week" = semana atual (Seg–Dom). "month" = últimos 6 meses civis (Jan, Fev...), incluindo o mês atual. */
+/** "week" = semana atual (Seg–Dom). "month" = todos os dias do mês selecionado. */
 export function rangeFor(period: ReportPeriod, reference: Date = new Date()) {
   if (period === "month") {
-    const startDate = startOfMonth(addMonths(reference, -5));
-    const endDate = endOfDay(reference);
+    const startDate = startOfMonth(reference);
+    const endDate = endOfDay(new Date(reference.getFullYear(), reference.getMonth() + 1, 0));
     return {
       startDate,
       endDate,
@@ -99,10 +99,22 @@ export function monthKey(date: Date) {
   return `${y}-${m}`;
 }
 
-/** "jan", "fev", ... capitalizado: "Jan", "Fev". */
+const MONTH_SHORT = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+const MONTH_FULL = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+/** "Jan", "Fev", ... — tabela fixa para evitar inconsistências do Hermes com toLocaleDateString. */
 export function formatMonthLabel(date: Date) {
-  const label = date.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "");
-  return label.charAt(0).toUpperCase() + label.slice(1);
+  return MONTH_SHORT[date.getMonth()];
+}
+
+/** "Janeiro 2026", "Fevereiro 2026", ... — tabela fixa para evitar inconsistências do Hermes. */
+export function formatMonthYear(date: Date) {
+  return `${MONTH_FULL[date.getMonth()]} ${date.getFullYear()}`;
+}
+
+/** "1", "2", ... — número do dia do mês, para o eixo X do gráfico mensal. */
+export function formatDayNumber(date: Date) {
+  return String(date.getDate());
 }
 
 /** Lista de dias (início do dia) entre start e end, inclusive. */

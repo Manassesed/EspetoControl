@@ -22,3 +22,5 @@ expo-tunnel.err.log
 dist-web/
 
 *.log
+
+supabase/.temp/

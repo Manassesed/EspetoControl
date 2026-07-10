@@ -6,10 +6,8 @@ import { listTodayProductSales, listTodaySales } from "@/services/saleService";
 import {
   dayKey,
   eachDay,
-  eachMonth,
-  formatMonthLabel,
+  formatDayNumber,
   formatShortDay,
-  monthKey,
   rangeFor,
   type ReportPeriod
 } from "@/utils/date";
@@ -48,12 +46,11 @@ export function useReport(empresaId: string | undefined, period: ReportPeriod, r
         return acc;
       }, {});
 
-      // Buckets por dia (semana) ou por mês civil (mês), zerando os que não tiveram venda
-      // para o gráfico ficar contínuo.
+      // Buckets diários para ambos os períodos: semana (7 dias) ou mês (dias do mês selecionado).
       const isMonthly = period === "month";
-      const keyFor = isMonthly ? monthKey : dayKey;
-      const labelFor = isMonthly ? formatMonthLabel : formatShortDay;
-      const bucketDates = isMonthly ? eachMonth(range.startDate, range.endDate) : eachDay(range.startDate, range.endDate);
+      const keyFor = dayKey;
+      const labelFor = isMonthly ? formatDayNumber : formatShortDay;
+      const bucketDates = eachDay(range.startDate, range.endDate);
 
       const buckets = new Map<string, DayBucket>();
       for (const bucketDate of bucketDates) {

@@ -2,7 +2,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useEffect, useState } from "react";
 import { Modal, Pressable, Text, View } from "react-native";
 
-import { addMonths, dayKey, isToday, startOfMonth } from "@/utils/date";
+import { addMonths, dayKey, formatMonthYear, isToday, startOfMonth } from "@/utils/date";
 
 type CalendarModalProps = {
   visible: boolean;
@@ -35,7 +35,7 @@ export function CalendarModal({ visible, selectedDate, onSelect, onClose }: Cale
   }, [visible, selectedDate]);
 
   const cells = buildMonthGrid(visibleMonth);
-  const monthLabel = visibleMonth.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+  const monthLabel = formatMonthYear(visibleMonth);
   const selectedKey = dayKey(selectedDate);
   const today = new Date();
   const disableNext = startOfMonth(visibleMonth) >= startOfMonth(today);
@@ -62,7 +62,7 @@ export function CalendarModal({ visible, selectedDate, onSelect, onClose }: Cale
             >
               <Ionicons name="chevron-back" size={18} color="#0F172A" />
             </Pressable>
-            <Text className="text-[13px] font-semibold capitalize text-ink">{monthLabel}</Text>
+            <Text className="text-[13px] font-semibold text-ink">{monthLabel}</Text>
             <Pressable
               className={`h-9 w-9 items-center justify-center rounded-xl bg-slate-50 ${disableNext ? "opacity-30" : ""}`}
               onPress={() => !disableNext && setVisibleMonth((m) => addMonths(m, 1))}

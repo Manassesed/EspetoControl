@@ -1,6 +1,6 @@
 ﻿import Ionicons from "@expo/vector-icons/Ionicons";
 import { Redirect, Tabs } from "expo-router";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAuth } from "@/context/AuthContext";
@@ -8,25 +8,16 @@ import { useAuth } from "@/context/AuthContext";
 type TabIconProps = {
   focused: boolean;
   icon: keyof typeof Ionicons.glyphMap;
-  label: string;
 };
 
-function TabIcon({ focused, icon, label }: TabIconProps) {
+function TabIcon({ focused, icon }: TabIconProps) {
   return (
-    <View className="h-14 w-[62px] items-center justify-center">
-      <View
-        className={`h-12 w-[58px] items-center justify-center rounded-2xl ${
-          focused ? "bg-ink" : "bg-transparent"
-        }`}
-      >
-        <Ionicons name={icon} color={focused ? "#FFFFFF" : "#64748B"} size={18} />
-        <Text
-          numberOfLines={1}
-          className={`mt-0.5 text-[9px] font-semibold ${focused ? "text-white" : "text-muted"}`}
-        >
-          {label}
-        </Text>
-      </View>
+    <View
+      className={`h-9 w-[52px] items-center justify-center rounded-2xl ${
+        focused ? "bg-ink" : "bg-transparent"
+      }`}
+    >
+      <Ionicons name={icon} color={focused ? "#FFFFFF" : "#64748B"} size={18} />
     </View>
   );
 }
@@ -52,13 +43,19 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#059669",
+        tabBarActiveTintColor: "#0F172A",
         tabBarInactiveTintColor: "#64748B",
-        tabBarShowLabel: false,
+        tabBarShowLabel: true,
+        tabBarLabelStyle: {
+          fontSize: 9,
+          fontWeight: "600",
+          marginTop: 2
+        },
         tabBarItemStyle: {
           height: 62,
           alignItems: "center",
-          justifyContent: "center"
+          justifyContent: "center",
+          paddingTop: 4
         },
         tabBarStyle: {
           position: "absolute",
@@ -66,8 +63,8 @@ export default function TabsLayout() {
           right: 0,
           bottom: 0,
           height: 62 + insets.bottom,
-          paddingBottom: insets.bottom + 6,
-          paddingTop: 6,
+          paddingBottom: insets.bottom + 4,
+          paddingTop: 4,
           paddingHorizontal: 4,
           borderTopLeftRadius: 22,
           borderTopRightRadius: 22,
@@ -85,7 +82,7 @@ export default function TabsLayout() {
         options={{
           title: "Dashboard",
           href: managerHref,
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="grid-outline" label="Hoje" />
+          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="grid-outline" />
         }}
       />
       <Tabs.Screen
@@ -93,7 +90,7 @@ export default function TabsLayout() {
         options={{
           title: "Relatório",
           href: managerHref,
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="stats-chart-outline" label="Relatório" />
+          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="stats-chart-outline" />
         }}
       />
       <Tabs.Screen
@@ -101,14 +98,14 @@ export default function TabsLayout() {
         options={{
           title: "Produtos",
           href: managerHref,
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="fast-food-outline" label="Itens" />
+          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="fast-food-outline" />
         }}
       />
       <Tabs.Screen
         name="venda"
         options={{
           title: "Venda",
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="add-circle-outline" label="Venda" />
+          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="add-circle-outline" />
         }}
       />
       <Tabs.Screen
@@ -116,7 +113,7 @@ export default function TabsLayout() {
         options={{
           title: "Gastos",
           href: managerHref,
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="receipt-outline" label="Gastos" />
+          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="receipt-outline" />
         }}
       />
       <Tabs.Screen
@@ -124,7 +121,7 @@ export default function TabsLayout() {
         options={{
           title: "Equipe",
           href: managerHref,
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="people-outline" label="Equipe" />
+          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="people-outline" />
         }}
       />
     </Tabs>

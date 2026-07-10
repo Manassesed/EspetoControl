@@ -67,8 +67,10 @@ export default function DashboardScreen() {
   const profitPercent = totalSales > 0 ? Math.max((profit / totalSales) * 100, 0) : 0;
   const bestProduct = productRows[0];
   const selectedSale = saleDetails.find((sale) => sale.id === saleDetailId) ?? null;
-  const canDeleteSelectedSale =
-    !!selectedSale && (profile?.role === "gerente" || ("usuario_id" in selectedSale && selectedSale.usuario_id === profile?.id));
+  // Só o gerente exclui venda (colaborador só visualiza as próprias). O banco
+  // (RLS) também impõe essa regra, então isso é só pra não mostrar um botão
+  // que resultaria em erro.
+  const canDeleteSelectedSale = !!selectedSale && profile?.role === "gerente";
   const insight =
     salesCount === 0
       ? "Comece pela primeira venda e deixe o lucro aparecer automaticamente."
