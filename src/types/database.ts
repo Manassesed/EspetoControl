@@ -65,6 +65,39 @@ export type Gasto = {
   created_at: string;
 };
 
+export type ComandaStatus = "aberta" | "fechada" | "cancelada";
+
+export type Mesa = {
+  id: string;
+  empresa_id: string;
+  nome: string;
+  ativa: boolean;
+  created_at: string;
+};
+
+export type Comanda = {
+  id: string;
+  empresa_id: string;
+  mesa_id: string;
+  status: ComandaStatus;
+  aberta_por: string;
+  fechada_por: string | null;
+  venda_id: string | null;
+  opened_at: string;
+  closed_at: string | null;
+};
+
+export type ComandaItem = {
+  id: string;
+  empresa_id: string;
+  comanda_id: string;
+  produto_id: string;
+  quantidade: number;
+  valor_unitario: number;
+  adicionado_por: string;
+  created_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -152,6 +185,68 @@ export type Database = {
           }
         ];
       };
+      mesas: {
+        Row: Mesa;
+        Insert: Omit<Mesa, "id" | "ativa" | "created_at"> & {
+          id?: string;
+          ativa?: boolean;
+          created_at?: string;
+        };
+        Update: Partial<Mesa>;
+        Relationships: [
+          {
+            foreignKeyName: "mesas_empresa_id_fkey";
+            columns: ["empresa_id"];
+            referencedRelation: "empresas";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      comandas: {
+        Row: Comanda;
+        Insert: Omit<Comanda, "id" | "status" | "fechada_por" | "venda_id" | "opened_at" | "closed_at"> & {
+          id?: string;
+          status?: ComandaStatus;
+          fechada_por?: string | null;
+          venda_id?: string | null;
+          opened_at?: string;
+          closed_at?: string | null;
+        };
+        Update: Partial<Comanda>;
+        Relationships: [
+          {
+            foreignKeyName: "comandas_empresa_id_fkey";
+            columns: ["empresa_id"];
+            referencedRelation: "empresas";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "comandas_mesa_id_fkey";
+            columns: ["mesa_id"];
+            referencedRelation: "mesas";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      comanda_itens: {
+        Row: ComandaItem;
+        Insert: Omit<ComandaItem, "id" | "created_at"> & { id?: string; created_at?: string };
+        Update: Partial<ComandaItem>;
+        Relationships: [
+          {
+            foreignKeyName: "comanda_itens_comanda_id_fkey";
+            columns: ["comanda_id"];
+            referencedRelation: "comandas";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "comanda_itens_produto_id_fkey";
+            columns: ["produto_id"];
+            referencedRelation: "produtos";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -196,6 +291,26 @@ export type Database = {
           }>;
         };
         Returns: Venda;
+      };
+      abrir_comanda: {
+        Args: { p_mesa_id: string };
+        Returns: Comanda;
+      };
+      comanda_incrementar_item: {
+        Args: { p_comanda_id: string; p_produto_id: string; p_delta: number };
+        Returns: ComandaItem | null;
+      };
+      comanda_definir_item: {
+        Args: { p_comanda_id: string; p_produto_id: string; p_quantidade: number };
+        Returns: ComandaItem | null;
+      };
+      fechar_comanda: {
+        Args: { p_comanda_id: string; p_forma_pagamento: PaymentMethod };
+        Returns: Venda;
+      };
+      cancelar_comanda: {
+        Args: { p_comanda_id: string };
+        Returns: Comanda;
       };
     };
     Enums: Record<string, never>;

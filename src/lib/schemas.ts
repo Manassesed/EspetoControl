@@ -41,6 +41,10 @@ export const expenseSchema = z.object({
   valor: localNumber("Informe um valor valido")
 });
 
+export const mesaSchema = z.object({
+  nome: z.string().min(1, "Informe o nome da mesa")
+});
+
 export const inviteSchema = z.object({
   email: z.string().email("Informe um email valido"),
   role: z.enum(["gerente", "colaborador"])
@@ -61,5 +65,6 @@ export type LoginForm = z.infer<typeof loginSchema>;
 export type RegisterForm = z.infer<typeof registerSchema>;
 export type ProductForm = z.infer<typeof productSchema>;
 export type ExpenseForm = z.infer<typeof expenseSchema>;
+export type MesaForm = z.infer<typeof mesaSchema>;
 export type InviteForm = z.infer<typeof inviteSchema>;
 export type SetPasswordForm = z.infer<typeof setPasswordSchema>;

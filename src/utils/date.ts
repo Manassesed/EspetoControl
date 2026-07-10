@@ -137,12 +137,12 @@ export function dayKey(date: Date) {
   return `${y}-${m}-${d}`;
 }
 
-const WEEKDAY_SHORT = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+const WEEKDAY_FULL = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
 
-/** "Sex 19". Usa tabela fixa em vez de Intl: o motor JS do app (Hermes) não
- * lida bem com o nome do dia da semana via toLocaleDateString em pt-BR. */
+/** "Segunda-feira 19". Usa tabela fixa em vez de Intl: o motor JS do app
+ * (Hermes) não lida bem com o nome do dia da semana via toLocaleDateString em pt-BR. */
 export function formatShortDay(date: Date) {
-  return `${WEEKDAY_SHORT[date.getDay()]} ${String(date.getDate()).padStart(2, "0")}`;
+  return `${WEEKDAY_FULL[date.getDay()]} ${String(date.getDate()).padStart(2, "0")}`;
 }
 
 /** dd/mm, usado quando o período é longo e o nome do dia da semana se repete demais. */
