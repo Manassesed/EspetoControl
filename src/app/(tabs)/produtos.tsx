@@ -1,16 +1,18 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Controller, useForm } from "react-hook-form";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Modal, RefreshControl, Text, View } from "react-native";
 import { useState } from "react";
 
 import { Redirect } from "expo-router";
 
 import { Header } from "@/components/Header";
 import { ProductRow } from "@/components/ProductRow";
+import { AnimatedPressable } from "@/components/ui/AnimatedPressable";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Screen } from "@/components/ui/Screen";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/context/AuthContext";
 import { useProductMutations, useProducts } from "@/hooks/useProducts";
 import { type ProductForm, productSchema } from "@/lib/schemas";
@@ -179,11 +181,22 @@ export default function ProductsScreen() {
     );
   }
 
+  const isFirstLoad = products.isLoading && !products.data;
+
   return (
-    <Screen>
+    <Screen
+      refreshControl={
+        <RefreshControl
+          refreshing={products.isFetching && !isFirstLoad}
+          onRefresh={() => products.refetch()}
+          tintColor="#10B981"
+          colors={["#10B981"]}
+        />
+      }
+    >
       <Header title="Cardápio" subtitle="Deixe o que vende mais a um toque do caixa" actionLabel="Novo" onAction={openCreate} />
 
-      <View className="rounded-2xl border border-line bg-white p-3.5">
+      <View className="rounded-2xl border border-line bg-white p-3">
         <View className="flex-row items-center justify-between">
           <View className="flex-1 pr-3">
             <Text className="text-[13px] font-semibold text-ink">Atalho para vender rápido</Text>
@@ -204,11 +217,13 @@ export default function ProductsScreen() {
       ) : null}
 
       <View className="gap-2">
-        {products.isLoading ? (
-          <View className="items-center gap-2 py-10">
-            <Ionicons name="sync-outline" size={28} color="#94A3B8" />
-            <Text className="text-sm text-muted">Buscando produtos...</Text>
-          </View>
+        {isFirstLoad ? (
+          <>
+            <Skeleton className="h-[68px] w-full" />
+            <Skeleton className="h-[68px] w-full" />
+            <Skeleton className="h-[68px] w-full" />
+            <Skeleton className="h-[68px] w-full" />
+          </>
         ) : products.isError ? (
           <View className="items-center gap-3 rounded-2xl border border-red-100 bg-red-50 p-6">
             <Ionicons name="wifi-outline" size={28} color="#EF4444" />
@@ -229,30 +244,31 @@ export default function ProductsScreen() {
               onPress={() => openEdit(product)}
               right={
                 <View className="mt-1 flex-row items-center gap-2">
-                  <Pressable
-                    className="flex-row items-center gap-1 rounded-full bg-brand-50 px-2 py-1"
+                  <AnimatedPressable
+                    className="flex-row items-center gap-1 rounded-full bg-brand-50 px-2 py-1.5"
                     onPress={() => openEdit(product)}
                   >
                     <Ionicons name="pencil-outline" size={12} color="#047857" />
                     <Text className="text-[11px] font-semibold text-brand-700">Editar</Text>
-                  </Pressable>
-                  <Pressable
-                    className="flex-row items-center gap-1 rounded-full bg-slate-100 px-2 py-1"
+                  </AnimatedPressable>
+                  <AnimatedPressable
+                    className="flex-row items-center gap-1 rounded-full bg-slate-100 px-2 py-1.5"
                     onPress={() => mutations.toggle.mutate({ id: product.id, ativo: !product.ativo })}
                   >
                     <Ionicons name={product.ativo ? "pause-outline" : "play-outline"} size={12} color="#0F172A" />
                     <Text className="text-[11px] font-semibold text-ink">{product.ativo ? "Pausar" : "Ativar"}</Text>
-                  </Pressable>
-                  <Pressable
-                    className={`h-7 w-7 items-center justify-center rounded-full ${confirmingId === product.id ? "bg-red-500" : "bg-red-50"}`}
+                  </AnimatedPressable>
+                  <AnimatedPressable
+                    className={`h-8 w-8 items-center justify-center rounded-full ${confirmingId === product.id ? "bg-red-500" : "bg-red-50"}`}
                     onPress={() => handleDeletePress(product.id)}
+                    hitSlop={4}
                   >
                     <Ionicons
                       name={confirmingId === product.id ? "checkmark" : "trash-outline"}
                       size={14}
                       color={confirmingId === product.id ? "#FFFFFF" : "#EF4444"}
                     />
-                  </Pressable>
+                  </AnimatedPressable>
                 </View>
               }
             />
