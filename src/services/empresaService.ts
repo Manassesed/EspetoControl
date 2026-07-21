@@ -4,7 +4,7 @@ import { supabase } from "@/services/supabase";
 export async function getEmpresaSubscription(empresaId: string): Promise<EmpresaSubscription> {
   const { data, error } = await supabase
     .from("empresas")
-    .select("subscription_status, trial_ends_at, mp_preapproval_id")
+    .select("subscription_status, trial_ends_at, mp_preapproval_id, paid_until")
     .eq("id", empresaId)
     .single();
 

@@ -1,5 +1,6 @@
 // Edge Function: recebe as notificações de webhook do Mercado Pago sobre a
-// assinatura (Preapproval) e atualiza o status de cobrança da empresa.
+// assinatura (Preapproval) OU sobre um pagamento avulso via Pix, e atualiza
+// o status de cobrança da empresa.
 //
 // Segurança: NUNCA confia nos valores que vêm no corpo do webhook — o
 // Mercado Pago manda só o tipo do evento e o id do recurso; sempre buscamos
@@ -42,6 +43,74 @@ function jsonResponse(body: unknown, status = 200) {
 // conhecidas pra assinatura (Preapproval).
 const PREAPPROVAL_TYPES = ["preapproval", "subscription_preapproval"];
 
+const PIX_CREDIT_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
+// deno-lint-ignore no-explicit-any
+async function handlePixPayment(admin: any, paymentId: string) {
+  const paymentResponse = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+    headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` }
+  });
+
+  if (!paymentResponse.ok) {
+    return jsonResponse({ error: "Falha ao consultar pagamento no Mercado Pago" }, 502);
+  }
+
+  const payment = await paymentResponse.json();
+
+  if (payment.status !== "approved" || payment.payment_method_id !== "pix") {
+    return jsonResponse({ ok: true, ignored: true });
+  }
+
+  const empresaId = payment.external_reference;
+  if (!empresaId) {
+    return jsonResponse({ ok: true, ignored: true });
+  }
+
+  // Marca esse pagamento como processado ANTES de creditar. O Mercado Pago
+  // reenvia o mesmo webhook várias vezes; a PK em mp_payment_id garante que
+  // só a primeira tentativa passa daqui — reentregas caem no "unique
+  // violation" e retornam sem mexer em paid_until de novo.
+  const { error: insertError } = await admin
+    .from("pix_pagamentos")
+    .insert({ mp_payment_id: String(payment.id), empresa_id: empresaId });
+
+  if (insertError) {
+    if (insertError.code === "23505") {
+      return jsonResponse({ ok: true, alreadyProcessed: true });
+    }
+    return jsonResponse({ error: "Falha ao registrar pagamento" }, 500);
+  }
+
+  const { data: empresa, error: fetchError } = await admin
+    .from("empresas")
+    .select("paid_until")
+    .eq("id", empresaId)
+    .maybeSingle();
+
+  if (fetchError) {
+    return jsonResponse({ error: "Falha ao buscar empresa" }, 500);
+  }
+
+  const currentPaidUntil = empresa?.paid_until ? new Date(empresa.paid_until).getTime() : 0;
+  const base = Math.max(currentPaidUntil, Date.now());
+  const newPaidUntil = new Date(base + PIX_CREDIT_DAYS_MS).toISOString();
+
+  const { error: updateError } = await admin
+    .from("empresas")
+    .update({
+      subscription_status: "active",
+      paid_until: newPaidUntil,
+      subscription_updated_at: new Date().toISOString()
+    })
+    .eq("id", empresaId);
+
+  if (updateError) {
+    return jsonResponse({ error: "Falha ao atualizar assinatura" }, 500);
+  }
+
+  return jsonResponse({ ok: true });
+}
+
 function mapMpStatus(mpStatus: string): "active" | "past_due" | "canceled" | null {
   switch (mpStatus) {
     case "authorized":
@@ -83,6 +152,12 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: true, ignored: true });
   }
 
+  const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+
+  if (type === "payment") {
+    return handlePixPayment(admin, resourceId);
+  }
+
   if (!PREAPPROVAL_TYPES.includes(type)) {
     return jsonResponse({ ok: true, ignored: true });
   }
@@ -102,8 +177,6 @@ Deno.serve(async (req) => {
   if (!newStatus) {
     return jsonResponse({ ok: true, ignored: true });
   }
-
-  const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
   // Casa primeiro pelo id da assinatura (gravado no momento da criação);
   // se por algum motivo essa empresa ainda não tiver esse id salvo (ex.:

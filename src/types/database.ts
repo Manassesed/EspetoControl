@@ -11,10 +11,14 @@ export type Empresa = {
   mp_preapproval_id: string | null;
   mp_payer_email: string | null;
   subscription_updated_at: string;
+  paid_until: string | null;
 };
 
 /** Projeção só com os campos que o gate de acesso e a tela de assinatura precisam. */
-export type EmpresaSubscription = Pick<Empresa, "subscription_status" | "trial_ends_at" | "mp_preapproval_id">;
+export type EmpresaSubscription = Pick<
+  Empresa,
+  "subscription_status" | "trial_ends_at" | "mp_preapproval_id" | "paid_until"
+>;
 
 export type AccessRole = "gerente" | "colaborador";
 export type MemberStatus = "pendente" | "ativo" | "inativo";
@@ -121,6 +125,7 @@ export type Database = {
           mp_preapproval_id?: string | null;
           mp_payer_email?: string | null;
           subscription_updated_at?: string;
+          paid_until?: string | null;
         };
         Update: Partial<Empresa>;
         Relationships: [];

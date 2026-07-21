@@ -4,12 +4,20 @@ import type { EmpresaSubscription } from "@/types/database";
 export function isSubscriptionBlocked(sub: EmpresaSubscription | null | undefined): boolean {
   if (!sub) return false;
 
-  if (sub.subscription_status === "active" || sub.subscription_status === "lifetime") {
+  if (sub.subscription_status === "lifetime") {
     return false;
   }
 
   if (sub.subscription_status === "trial") {
     return new Date(sub.trial_ends_at).getTime() < Date.now();
+  }
+
+  if (sub.subscription_status === "active") {
+    // Sem paid_until: assinatura via cartão, controlada pelo Mercado Pago
+    // (o webhook muda o status quando vence/falha). Com paid_until: pago
+    // via Pix avulso, sem débito automático — vence quando a data passar.
+    if (!sub.paid_until) return false;
+    return new Date(sub.paid_until).getTime() < Date.now();
   }
 
   // "past_due" ou "canceled"
