@@ -1,7 +1,8 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useMemo } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
+import { AnimatedPressable } from "@/components/ui/AnimatedPressable";
 import { formatCurrency } from "@/utils/currency";
 
 type CashChangePanelProps = {
@@ -31,44 +32,44 @@ export function CashChangePanel({ total, received, onChange, onOpenKeypad }: Cas
   const isShort = hasReceived && change < 0;
 
   return (
-    <View className="rounded-2xl border border-line bg-white p-3.5">
+    <View className="rounded-2xl border border-line bg-white p-3">
       <View className="mb-2.5 flex-row items-center justify-between">
         <Text className="text-[13px] font-semibold text-ink">Recebido em dinheiro</Text>
         <Ionicons name="cash-outline" size={17} color="#2563EB" />
       </View>
 
       <View className="flex-row flex-wrap gap-2">
-        <Pressable
-          className={`rounded-xl border px-3 py-1.5 ${
+        <AnimatedPressable
+          className={`rounded-xl border px-3 py-2 ${
             received === total && hasReceived ? "border-blue-500 bg-blue-50" : "border-line bg-slate-50"
           }`}
           onPress={() => onChange(total)}
         >
           <Text className="text-[11px] font-semibold text-ink">Valor exato</Text>
-        </Pressable>
+        </AnimatedPressable>
 
         {suggestions.map((value) => {
           const selected = received === value;
           return (
-            <Pressable
+            <AnimatedPressable
               key={value}
-              className={`rounded-xl border px-3 py-1.5 ${
+              className={`rounded-xl border px-3 py-2 ${
                 selected ? "border-blue-500 bg-blue-50" : "border-line bg-slate-50"
               }`}
               onPress={() => onChange(value)}
             >
               <Text className="text-[11px] font-semibold text-ink">{formatCurrency(value)}</Text>
-            </Pressable>
+            </AnimatedPressable>
           );
         })}
 
-        <Pressable
-          className="flex-row items-center gap-1 rounded-xl border border-line bg-slate-50 px-3 py-1.5"
+        <AnimatedPressable
+          className="flex-row items-center gap-1 rounded-xl border border-line bg-slate-50 px-3 py-2"
           onPress={onOpenKeypad}
         >
           <Ionicons name="keypad-outline" size={13} color="#0F172A" />
           <Text className="text-[11px] font-semibold text-ink">Outro</Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
 
       {hasReceived ? (

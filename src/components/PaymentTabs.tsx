@@ -1,6 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
+import { AnimatedPressable } from "@/components/ui/AnimatedPressable";
 import type { PaymentMethod } from "@/types/database";
 
 type PaymentTabsProps = {
@@ -30,7 +31,7 @@ export function PaymentTabs({ value, onChange }: PaymentTabsProps) {
         {categories.map((cat) => {
           const selected = cat.value === category;
           return (
-            <Pressable
+            <AnimatedPressable
               key={cat.value}
               className={`flex-1 items-center justify-center gap-1 rounded-xl py-2.5 ${selected ? cat.activeBg : "bg-slate-100"}`}
               onPress={() => {
@@ -43,29 +44,29 @@ export function PaymentTabs({ value, onChange }: PaymentTabsProps) {
             >
               <Ionicons name={cat.icon as any} size={18} color={selected ? "#FFFFFF" : "#64748B"} />
               <Text className={`text-[11px] font-semibold ${selected ? "text-white" : "text-muted"}`}>{cat.label}</Text>
-            </Pressable>
+            </AnimatedPressable>
           );
         })}
       </View>
 
       {category === "cartao" ? (
         <View className="mt-2 flex-row gap-2">
-          <Pressable
+          <AnimatedPressable
             className={`flex-1 items-center justify-center rounded-xl py-2 ${value === "cartao_credito" ? "bg-violet-100 border border-violet-300" : "bg-slate-50 border border-line"}`}
             onPress={() => onChange("cartao_credito")}
           >
             <Text className={`text-[12px] font-semibold ${value === "cartao_credito" ? "text-violet-700" : "text-muted"}`}>
               Crédito
             </Text>
-          </Pressable>
-          <Pressable
+          </AnimatedPressable>
+          <AnimatedPressable
             className={`flex-1 items-center justify-center rounded-xl py-2 ${value === "cartao_debito" ? "bg-violet-100 border border-violet-300" : "bg-slate-50 border border-line"}`}
             onPress={() => onChange("cartao_debito")}
           >
             <Text className={`text-[12px] font-semibold ${value === "cartao_debito" ? "text-violet-700" : "text-muted"}`}>
               Débito
             </Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
       ) : null}
     </View>

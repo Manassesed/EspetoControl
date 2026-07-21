@@ -9,6 +9,7 @@ import { Header } from "@/components/Header";
 import { PaymentTabs } from "@/components/PaymentTabs";
 import { ProductRow } from "@/components/ProductRow";
 import { AnimatedIconBadge } from "@/components/ui/AnimatedIconBadge";
+import { AnimatedPressable } from "@/components/ui/AnimatedPressable";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { NumericKeypad } from "@/components/ui/NumericKeypad";
@@ -131,24 +132,25 @@ export default function SaleScreen() {
         colors={["#111827", "#1E3A8A", "#10B981"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className="rounded-2xl p-4"
+        className="rounded-2xl p-3.5"
       >
         <View className="flex-row items-center justify-between">
-          <View className="flex-1 pr-4">
-            <Text className="text-[11px] font-semibold uppercase tracking-wide text-emerald-50">Pedido atual</Text>
-            <Text className="mt-1 text-3xl font-bold tracking-tight text-white">{formatCurrency(cart.total)}</Text>
-            <Text className="mt-1 text-[13px] text-emerald-50">
+          <View className="flex-1 pr-3">
+            <Text className="text-[10px] font-semibold uppercase tracking-wide text-emerald-50">Pedido atual</Text>
+            <Text className="mt-0.5 text-2xl font-bold tracking-tight text-white">{formatCurrency(cart.total)}</Text>
+            <Text className="mt-1 text-[12px] text-emerald-50">
               {cart.items.length ? `${cart.items.length} item(ns) no pedido` : "Toque nos produtos para montar a venda"}
             </Text>
           </View>
-          <AnimatedIconBadge icon="bag-check-outline" size="md" colors={["#ECFDF5", "#10B981", "#064E3B"]} />
+          <AnimatedIconBadge icon="bag-check-outline" size="sm" colors={["#ECFDF5", "#10B981", "#064E3B"]} />
         </View>
         {cart.items.length ? (
           <View className="mt-3 gap-1.5">
             {cart.items.map((item) => (
               <View key={item.produto.id} className="flex-row items-center justify-between rounded-xl bg-white/10 px-2.5 py-1.5">
                 <Pressable
-                  className="flex-1 flex-row items-center gap-1"
+                  className="flex-1 flex-row items-center gap-1 py-1"
+                  hitSlop={6}
                   onPress={() => setKeypadTarget({ kind: "qty", product: item.produto })}
                 >
                   <Text className="text-[11px] font-medium text-white">
@@ -156,11 +158,11 @@ export default function SaleScreen() {
                   </Text>
                   <Ionicons name="create-outline" size={12} color="#A7F3D0" />
                 </Pressable>
-                <View className="flex-row items-center gap-2">
-                  <Pressable onPress={() => cart.decrementProduct(item.produto.id)}>
+                <View className="flex-row items-center gap-3">
+                  <Pressable onPress={() => cart.decrementProduct(item.produto.id)} hitSlop={8}>
                     <Ionicons name="remove-circle-outline" size={20} color="#FCA5A5" />
                   </Pressable>
-                  <Pressable onPress={() => cart.removeProduct(item.produto.id)} hitSlop={6}>
+                  <Pressable onPress={() => cart.removeProduct(item.produto.id)} hitSlop={8}>
                     <Ionicons name="trash-outline" size={16} color="#FCA5A5" />
                   </Pressable>
                 </View>
@@ -203,15 +205,15 @@ export default function SaleScreen() {
             {[null, ...categories].map((cat) => {
               const selected = cat === selectedCategory;
               return (
-                <Pressable
+                <AnimatedPressable
                   key={cat ?? "todos"}
-                  className={`rounded-full px-3 py-1 ${selected ? "bg-ink" : "bg-slate-100"}`}
+                  className={`rounded-full px-3 py-1.5 ${selected ? "bg-ink" : "bg-slate-100"}`}
                   onPress={() => setSelectedCategory(cat)}
                 >
                   <Text className={`text-[11px] font-semibold ${selected ? "text-white" : "text-muted"}`}>
                     {cat ?? "Todos"}
                   </Text>
-                </Pressable>
+                </AnimatedPressable>
               );
             })}
           </View>
@@ -231,22 +233,22 @@ export default function SaleScreen() {
                 right={
                   <View className="mt-1 flex-row items-center gap-2">
                     {cartItem ? (
-                      <Pressable
-                        className="h-8 w-8 items-center justify-center rounded-full bg-red-50"
+                      <AnimatedPressable
+                        className="h-9 w-9 items-center justify-center rounded-full bg-red-50"
                         onPress={() => cart.decrementProduct(product.id)}
                       >
                         <Ionicons name="remove" size={16} color="#EF4444" />
-                      </Pressable>
+                      </AnimatedPressable>
                     ) : null}
                     {cartItem ? (
-                      <Pressable
-                        className="min-w-8 items-center rounded-lg bg-slate-100 px-2 py-1"
+                      <AnimatedPressable
+                        className="min-w-9 items-center rounded-lg bg-slate-100 px-2 py-1.5"
                         onPress={() => setKeypadTarget({ kind: "qty", product })}
                       >
                         <Text className="text-[13px] font-bold text-ink">{cartItem.quantidade}</Text>
-                      </Pressable>
+                      </AnimatedPressable>
                     ) : null}
-                    <View className="h-8 w-8 items-center justify-center rounded-full bg-brand-600">
+                    <View className="h-9 w-9 items-center justify-center rounded-full bg-brand-600">
                       <Ionicons name="add" size={18} color="#FFFFFF" />
                     </View>
                   </View>
