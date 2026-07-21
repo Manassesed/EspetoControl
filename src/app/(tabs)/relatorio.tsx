@@ -2,15 +2,17 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Redirect } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
 
 import { CalendarModal } from "@/components/CalendarModal";
 import { Header } from "@/components/Header";
 import { AnimatedIconBadge } from "@/components/ui/AnimatedIconBadge";
+import { AnimatedPressable } from "@/components/ui/AnimatedPressable";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { Screen } from "@/components/ui/Screen";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/context/AuthContext";
 import { useReport } from "@/hooks/useReport";
 import { addDays, addMonths, dayKey, formatMonthYear, type ReportPeriod } from "@/utils/date";
@@ -38,6 +40,7 @@ export default function ReportScreen() {
   const [selectedBucket, setSelectedBucket] = useState<{ key: string; label: string } | null>(null);
   const report = useReport(profile?.empresa_id, period, referenceDate);
   const data = report.data;
+  const isFirstLoad = report.isLoading && !data;
 
   const keyForBucket = dayKey;
 
@@ -157,7 +160,16 @@ export default function ReportScreen() {
   }
 
   return (
-    <Screen>
+    <Screen
+      refreshControl={
+        <RefreshControl
+          refreshing={report.isFetching && !isFirstLoad}
+          onRefresh={() => report.refetch()}
+          tintColor="#10B981"
+          colors={["#10B981"]}
+        />
+      }
+    >
       <CalendarModal
         visible={calendarVisible}
         selectedDate={referenceDate}
@@ -174,27 +186,44 @@ export default function ReportScreen() {
         </View>
       ) : null}
 
+      {isFirstLoad ? (
+        <View className="gap-2.5">
+          <Skeleton className="h-[132px] w-full" />
+          <View className="flex-row gap-2">
+            <Skeleton className="h-[72px] flex-1 rounded-xl" />
+            <Skeleton className="h-[72px] flex-1 rounded-xl" />
+          </View>
+          <Skeleton className="h-[240px] w-full" />
+          <View className="flex-row gap-2">
+            <Skeleton className="h-[72px] flex-1 rounded-xl" />
+            <Skeleton className="h-[72px] flex-1 rounded-xl" />
+          </View>
+          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-28 w-full" />
+        </View>
+      ) : (
+        <>
       <LinearGradient
         colors={profit >= 0 ? ["#101828", "#0F766E", "#10B981"] : ["#101828", "#7F1D1D", "#EF4444"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className="overflow-hidden rounded-2xl p-4"
+        className="overflow-hidden rounded-2xl p-3.5"
       >
         <View className="flex-row items-start justify-between">
-          <View className="flex-1 pr-4">
-            <Text className="text-[11px] font-semibold uppercase tracking-wide text-emerald-50">Lucro · {periodLabel}</Text>
-            <Text className="mt-1 text-3xl font-bold tracking-tight text-white">{formatCurrency(profit)}</Text>
-            <Text className="mt-1.5 text-[13px] text-emerald-50">
+          <View className="flex-1 pr-3">
+            <Text className="text-[10px] font-semibold uppercase tracking-wide text-emerald-50">Lucro · {periodLabel}</Text>
+            <Text className="mt-0.5 text-2xl font-bold tracking-tight text-white">{formatCurrency(profit)}</Text>
+            <Text className="mt-1 text-[12px] leading-4 text-emerald-50">
               {salesCount > 0
                 ? `${salesCount} atendimentos · ticket médio ${formatCurrency(averageTicket)}`
                 : "Sem vendas no período."}
             </Text>
           </View>
-          <AnimatedIconBadge icon="stats-chart-outline" size="md" colors={["#ECFDF5", "#10B981", "#064E3B"]} />
+          <AnimatedIconBadge icon="stats-chart-outline" size="sm" colors={["#ECFDF5", "#10B981", "#064E3B"]} />
         </View>
-        <View className="mt-4 rounded-xl bg-white/10 p-2.5">
-          <Text className="text-[11px] font-semibold uppercase tracking-wide text-white">Insight para o gestor</Text>
-          <Text className="mt-1 text-[13px] leading-5 text-white">{insight}</Text>
+        <View className="mt-3 rounded-xl bg-white/10 p-2">
+          <Text className="text-[10px] font-semibold uppercase tracking-wide text-white">Insight para o gestor</Text>
+          <Text className="mt-1 text-[12px] leading-4 text-white">{insight}</Text>
         </View>
       </LinearGradient>
 
@@ -203,7 +232,7 @@ export default function ReportScreen() {
         <MetricCard label="Gastos" value={formatCurrency(totalExpenses)} tone="warning" icon="receipt-outline" />
       </View>
 
-      <View className="rounded-2xl border border-line bg-white p-3.5">
+      <View className="rounded-2xl border border-line bg-white p-3">
         <View className="flex-row items-center justify-between">
           <View>
             <Text className="text-[13px] font-semibold text-ink">{period === "week" ? "Vendas por dia" : "Vendas por mês"}</Text>
@@ -221,26 +250,26 @@ export default function ReportScreen() {
         </View>
 
         <View className="mt-3 flex-row items-center gap-2">
-          <Pressable
-            className="h-8 w-8 items-center justify-center rounded-xl bg-slate-100"
+          <AnimatedPressable
+            className="h-10 w-10 items-center justify-center rounded-xl bg-slate-100"
             onPress={goPrev}
           >
             <Ionicons name="chevron-back" size={16} color="#0F172A" />
-          </Pressable>
-          <Pressable
-            className="flex-1 flex-row items-center justify-center gap-1.5 rounded-xl bg-slate-50 py-1.5"
+          </AnimatedPressable>
+          <AnimatedPressable
+            className="flex-1 flex-row items-center justify-center gap-1.5 rounded-xl bg-slate-50 py-2"
             onPress={() => setCalendarVisible(true)}
           >
             <Ionicons name="calendar-outline" size={13} color="#64748B" />
             <Text className="text-[12px] font-semibold text-ink">{periodNavLabel}</Text>
-          </Pressable>
-          <Pressable
-            className={`h-8 w-8 items-center justify-center rounded-xl bg-slate-100 ${isCurrentPeriod ? "opacity-30" : ""}`}
+          </AnimatedPressable>
+          <AnimatedPressable
+            className={`h-10 w-10 items-center justify-center rounded-xl bg-slate-100 ${isCurrentPeriod ? "opacity-30" : ""}`}
             onPress={goNext}
             disabled={isCurrentPeriod}
           >
             <Ionicons name="chevron-forward" size={16} color="#0F172A" />
-          </Pressable>
+          </AnimatedPressable>
         </View>
 
         {report.isLoading ? (
@@ -263,13 +292,13 @@ export default function ReportScreen() {
               </View>
 
               {selectedBucket ? (
-                <Pressable
+                <AnimatedPressable
                   className="flex-row items-center gap-1 rounded-full bg-slate-100 px-2 py-1"
                   onPress={() => setSelectedBucket(null)}
                 >
                   <Text className="text-[11px] font-semibold text-ink">{selectedBucket.label}</Text>
                   <Ionicons name="close-circle" size={13} color="#0F172A" />
-                </Pressable>
+                </AnimatedPressable>
               ) : null}
             </View>
 
@@ -284,7 +313,7 @@ export default function ReportScreen() {
                     const isBest = bestDay?.key === bar.key && bar.sales > 0;
                     const isSelected = selectedBucket?.key === bar.key;
                     return (
-                      <Pressable
+                      <AnimatedPressable
                         key={bar.key}
                         className={`flex-row items-end gap-1 rounded-lg ${isSelected ? "bg-slate-100" : ""}`}
                         style={{ width: 44, height: "100%" }}
@@ -311,7 +340,7 @@ export default function ReportScreen() {
                           ) : null}
                           <View className="w-4 rounded-t-lg bg-red-400" style={{ height: `${expensesH}%` }} />
                         </View>
-                      </Pressable>
+                      </AnimatedPressable>
                     );
                   })}
                 </View>
@@ -329,9 +358,9 @@ export default function ReportScreen() {
               {periods.map((p) => {
                 const selected = p.value === period;
                 return (
-                  <Pressable
+                  <AnimatedPressable
                     key={p.value}
-                    className={`rounded-full px-3 py-1 ${selected ? "bg-ink" : "bg-slate-100"}`}
+                    className={`rounded-full px-3 py-1.5 ${selected ? "bg-ink" : "bg-slate-100"}`}
                     onPress={() => {
                       setPeriod(p.value);
                       setSelectedBucket(null);
@@ -339,7 +368,7 @@ export default function ReportScreen() {
                     }}
                   >
                     <Text className={`text-[11px] font-semibold ${selected ? "text-white" : "text-muted"}`}>{p.label}</Text>
-                  </Pressable>
+                  </AnimatedPressable>
                 );
               })}
             </View>
@@ -352,7 +381,7 @@ export default function ReportScreen() {
         <MetricCard label="Ticket médio" value={formatCurrency(averageTicket)} tone="neutral" icon="analytics-outline" />
       </View>
 
-      <View className="rounded-2xl border border-line bg-white p-3.5">
+      <View className="rounded-2xl border border-line bg-white p-3">
         <Text className="text-[13px] font-semibold text-ink">Como o dinheiro entrou</Text>
         {paymentRows.length === 0 ? (
           <EmptyState title="Sem vendas no período" description="As formas de pagamento aparecem quando houver venda." />
@@ -376,7 +405,7 @@ export default function ReportScreen() {
         )}
       </View>
 
-      <View className="rounded-2xl border border-line bg-white p-3.5">
+      <View className="rounded-2xl border border-line bg-white p-3">
         <Text className="text-[13px] font-semibold text-ink">Mais vendidos no período</Text>
         {productRows.length === 0 ? (
           <EmptyState title="Sem produtos vendidos" description="Os campeões de venda aparecem aqui." />
@@ -420,6 +449,8 @@ export default function ReportScreen() {
           onPress={handleExport}
         />
       </View>
+        </>
+      )}
     </Screen>
   );
 }
