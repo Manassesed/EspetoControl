@@ -2,15 +2,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Redirect } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
-import { Alert, Modal, Pressable, Text, View } from "react-native";
+import { Alert, Modal, RefreshControl, Text, View } from "react-native";
 import { useState } from "react";
 
 import { Header } from "@/components/Header";
 import { AnimatedIconBadge } from "@/components/ui/AnimatedIconBadge";
+import { AnimatedPressable } from "@/components/ui/AnimatedPressable";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input } from "@/components/ui/Input";
 import { Screen } from "@/components/ui/Screen";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/context/AuthContext";
 import { useExpenseMutations, useExpenses } from "@/hooks/useExpenses";
 import { type ExpenseForm, expenseSchema } from "@/lib/schemas";
@@ -93,11 +95,22 @@ export default function ExpensesScreen() {
     group.total += Number(expense.valor);
   }
 
+  const isFirstLoad = expenses.isLoading && !expenses.data;
+
   return (
-    <Screen>
+    <Screen
+      refreshControl={
+        <RefreshControl
+          refreshing={expenses.isFetching && !isFirstLoad}
+          onRefresh={() => expenses.refetch()}
+          tintColor="#10B981"
+          colors={["#10B981"]}
+        />
+      }
+    >
       <Header title="Saídas" subtitle="Tudo que diminui o lucro do dia" actionLabel="Novo" onAction={openCreate} />
 
-      <View className="rounded-2xl border border-line bg-white p-3.5">
+      <View className="rounded-2xl border border-line bg-white p-3">
         <View className="flex-row items-center justify-between">
           <View className="flex-1 pr-3">
             <Text className="text-[13px] font-semibold text-ink">Lucro sem chute</Text>
@@ -110,7 +123,13 @@ export default function ExpensesScreen() {
       </View>
 
       <View className="gap-3">
-        {groups.length ? (
+        {isFirstLoad ? (
+          <>
+            <Skeleton className="h-[60px] w-full" />
+            <Skeleton className="h-[60px] w-full" />
+            <Skeleton className="h-[60px] w-full" />
+          </>
+        ) : groups.length ? (
           groups.map((group) => (
             <View key={group.key} className="gap-2">
               <View className="flex-row items-center justify-between px-1">
@@ -118,7 +137,7 @@ export default function ExpensesScreen() {
                 <Text className="text-[11px] font-semibold text-muted">{formatCurrency(group.total)}</Text>
               </View>
               {group.items.map((expense) => (
-                <Pressable
+                <AnimatedPressable
                   key={expense.id}
                   className="rounded-2xl border border-line bg-white p-2.5"
                   onPress={() => openEdit(expense)}
@@ -132,8 +151,8 @@ export default function ExpensesScreen() {
                       <Text className="mt-0.5 text-[11px] text-muted">{expense.categoria}</Text>
                     </View>
                     <Text className="mr-2.5 text-[13px] font-bold text-danger">{formatCurrency(expense.valor)}</Text>
-                    <Pressable
-                      className={`h-8 w-8 items-center justify-center rounded-full ${confirmingId === expense.id ? "bg-red-500" : "bg-red-50"}`}
+                    <AnimatedPressable
+                      className={`h-9 w-9 items-center justify-center rounded-full ${confirmingId === expense.id ? "bg-red-500" : "bg-red-50"}`}
                       onPress={(e) => { e.stopPropagation?.(); handleDeletePress(expense.id); }}
                     >
                       <Ionicons
@@ -141,14 +160,14 @@ export default function ExpensesScreen() {
                         size={14}
                         color={confirmingId === expense.id ? "#FFFFFF" : "#EF4444"}
                       />
-                    </Pressable>
+                    </AnimatedPressable>
                   </View>
                   {confirmingId === expense.id && (
                     <Text className="mt-2 text-center text-[11px] font-semibold text-red-500">
                       Toque novamente para confirmar exclusão
                     </Text>
                   )}
-                </Pressable>
+                </AnimatedPressable>
               ))}
             </View>
           ))
