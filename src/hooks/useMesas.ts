@@ -53,6 +53,7 @@ export function useMesasComComandas(empresaId?: string) {
   return {
     mesas,
     isLoading: mesasQuery.isLoading || comandasQuery.isLoading,
+    isFetching: mesasQuery.isFetching || comandasQuery.isFetching,
     isError: mesasQuery.isError || comandasQuery.isError,
     refetch: () => {
       mesasQuery.refetch();

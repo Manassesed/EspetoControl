@@ -3,13 +3,15 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import { useState } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Modal, Pressable, RefreshControl, Text, View } from "react-native";
 
 import { Header } from "@/components/Header";
+import { AnimatedPressable } from "@/components/ui/AnimatedPressable";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input } from "@/components/ui/Input";
 import { Screen } from "@/components/ui/Screen";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { isDemoCompany } from "@/constants/demo";
 import { useAuth } from "@/context/AuthContext";
 import { useMesaMutations, useMesasComComandas, type MesaComStatus } from "@/hooks/useMesas";
@@ -29,7 +31,7 @@ function MesaTile({
   const ocupada = item.comandaId !== null;
 
   return (
-    <Pressable
+    <AnimatedPressable
       className={`w-[31%] rounded-2xl p-3 ${ocupada ? "bg-brand-600" : "border border-line bg-white"}`}
       onPress={() => router.push({ pathname: "/mesa/[id]", params: { id: item.mesa.id, nome: item.mesa.nome } })}
     >
@@ -54,7 +56,7 @@ function MesaTile({
       ) : (
         <Text className="mt-2 text-[11px] text-muted">Livre</Text>
       )}
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
@@ -63,7 +65,7 @@ export default function MesasScreen() {
   const isManager = profile?.role === "gerente";
   const demo = isDemoCompany(profile?.empresa_id);
 
-  const { mesas, isLoading, isError, refetch } = useMesasComComandas(profile?.empresa_id);
+  const { mesas, isLoading, isFetching, isError, refetch } = useMesasComComandas(profile?.empresa_id);
   const mutations = useMesaMutations(profile?.empresa_id);
 
   const [editing, setEditing] = useState<Mesa | null>(null);
@@ -149,8 +151,19 @@ export default function MesasScreen() {
   const mesasAtivas = mesas.filter((item) => item.mesa.ativa);
   const mesasPausadas = mesas.filter((item) => !item.mesa.ativa);
 
+  const isFirstLoad = isLoading && !mesas.length;
+
   return (
-    <Screen>
+    <Screen
+      refreshControl={
+        <RefreshControl
+          refreshing={isFetching && !isFirstLoad}
+          onRefresh={() => refetch()}
+          tintColor="#10B981"
+          colors={["#10B981"]}
+        />
+      }
+    >
       <Header
         title="Mesas"
         subtitle="Toque numa mesa livre pra abrir a conta"
@@ -158,10 +171,14 @@ export default function MesasScreen() {
         onAction={isManager ? openCreate : undefined}
       />
 
-      {isLoading ? (
-        <View className="items-center gap-2 py-10">
-          <Ionicons name="sync-outline" size={28} color="#94A3B8" />
-          <Text className="text-sm text-muted">Carregando mesas...</Text>
+      {isFirstLoad ? (
+        <View className="flex-row flex-wrap gap-3">
+          <Skeleton className="h-[92px] w-[31%]" />
+          <Skeleton className="h-[92px] w-[31%]" />
+          <Skeleton className="h-[92px] w-[31%]" />
+          <Skeleton className="h-[92px] w-[31%]" />
+          <Skeleton className="h-[92px] w-[31%]" />
+          <Skeleton className="h-[92px] w-[31%]" />
         </View>
       ) : isError ? (
         <View className="items-center gap-3 rounded-2xl border border-red-100 bg-red-50 p-6">
@@ -191,19 +208,19 @@ export default function MesasScreen() {
       )}
 
       {isManager && mesasPausadas.length ? (
-        <View className="rounded-2xl border border-line bg-white p-3.5">
+        <View className="rounded-2xl border border-line bg-white p-3">
           <Text className="text-[13px] font-semibold text-ink">Mesas pausadas</Text>
           <View className="mt-2 gap-2">
             {mesasPausadas.map((item) => (
               <View key={item.mesa.id} className="flex-row items-center justify-between rounded-xl bg-slate-50 px-3 py-2">
                 <Text className="text-[13px] text-ink">{item.mesa.nome}</Text>
-                <Pressable
-                  className="flex-row items-center gap-1 rounded-full bg-white px-2 py-1"
+                <AnimatedPressable
+                  className="flex-row items-center gap-1 rounded-full bg-white px-2 py-1.5"
                   onPress={() => mutations.toggle.mutate({ id: item.mesa.id, ativa: true })}
                 >
                   <Ionicons name="play-outline" size={12} color="#0F172A" />
                   <Text className="text-[11px] font-semibold text-ink">Reativar</Text>
-                </Pressable>
+                </AnimatedPressable>
               </View>
             ))}
           </View>
@@ -250,7 +267,7 @@ export default function MesasScreen() {
                     <Text className="text-[13px] font-medium text-red-600">{deleteError}</Text>
                   </View>
                 ) : null}
-                <Pressable
+                <AnimatedPressable
                   className="flex-row items-center justify-center gap-2 rounded-xl bg-slate-100 p-3"
                   onPress={() => mutations.toggle.mutate({ id: editing.id, ativa: !editing.ativa })}
                 >
@@ -258,7 +275,7 @@ export default function MesasScreen() {
                   <Text className="text-[13px] font-semibold text-ink">
                     {editing.ativa ? "Pausar mesa" : "Reativar mesa"}
                   </Text>
-                </Pressable>
+                </AnimatedPressable>
                 <Button
                   title={confirmingId === editing.id ? "Toque para confirmar exclusão" : "Excluir mesa"}
                   icon="trash-outline"
