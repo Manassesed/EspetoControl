@@ -3,13 +3,15 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Modal, Pressable, RefreshControl, Text, View } from "react-native";
 
 import { Header } from "@/components/Header";
 import { ManagerGate } from "@/components/ManagerGate";
+import { AnimatedPressable } from "@/components/ui/AnimatedPressable";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Screen } from "@/components/ui/Screen";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/context/AuthContext";
 import { useTeam, useTeamMutations } from "@/hooks/useTeam";
 import { type InviteForm, inviteSchema } from "@/lib/schemas";
@@ -72,9 +74,9 @@ function MemberRow({
         </View>
       </View>
       {!isSelf ? (
-        <Pressable className="h-8 w-8 items-center justify-center rounded-full bg-slate-50" onPress={onPressMenu}>
+        <AnimatedPressable className="h-9 w-9 items-center justify-center rounded-full bg-slate-50" onPress={onPressMenu}>
           <Ionicons name="ellipsis-vertical" size={16} color="#0F172A" />
-        </Pressable>
+        </AnimatedPressable>
       ) : null}
     </View>
   );
@@ -100,8 +102,8 @@ function SubscriptionBanner() {
   const textTone = subscription_status === "trial" ? "text-amber-700" : "text-emerald-700";
 
   return (
-    <Pressable
-      className={`flex-row items-center justify-between rounded-2xl p-3.5 ${tone}`}
+    <AnimatedPressable
+      className={`flex-row items-center justify-between rounded-2xl p-3 ${tone}`}
       onPress={() => router.push("/assinatura")}
     >
       <View className="flex-row items-center gap-2">
@@ -109,7 +111,7 @@ function SubscriptionBanner() {
         <Text className={`text-[13px] font-semibold ${textTone}`}>{label}</Text>
       </View>
       <Ionicons name="chevron-forward" size={16} color="#0F172A" />
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
@@ -171,19 +173,31 @@ export default function TeamScreen() {
     setActionsFor(null);
   }
 
+  const isFirstLoad = team.isLoading && !team.data;
+
   return (
     <ManagerGate>
-      <Screen>
+      <Screen
+        refreshControl={
+          <RefreshControl
+            refreshing={team.isFetching && !isFirstLoad}
+            onRefresh={() => team.refetch()}
+            tintColor="#10B981"
+            colors={["#10B981"]}
+          />
+        }
+      >
         <Header title="Minha equipe" subtitle="Convide e gerencie quem acessa o app" actionLabel="Convidar" onAction={openInvite} />
 
         <SubscriptionBanner />
 
         <View className="gap-2">
-          {team.isLoading ? (
-            <View className="items-center gap-2 py-10">
-              <Ionicons name="sync-outline" size={28} color="#94A3B8" />
-              <Text className="text-sm text-muted">Carregando equipe...</Text>
-            </View>
+          {isFirstLoad ? (
+            <>
+              <Skeleton className="h-[76px] w-full" />
+              <Skeleton className="h-[76px] w-full" />
+              <Skeleton className="h-[76px] w-full" />
+            </>
           ) : team.data?.length ? (
             team.data.map((member) => (
               <MemberRow
@@ -235,7 +249,7 @@ export default function TeamScreen() {
                       {(["colaborador", "gerente"] as const).map((value) => {
                         const selected = field.value === value;
                         return (
-                          <Pressable
+                          <AnimatedPressable
                             key={value}
                             className={`flex-1 rounded-xl border p-3 ${
                               selected ? "border-ink bg-ink" : "border-line bg-white"
@@ -248,7 +262,7 @@ export default function TeamScreen() {
                             <Text className={`mt-0.5 text-[11px] ${selected ? "text-slate-200" : "text-muted"}`}>
                               {value === "gerente" ? "Vê tudo: vendas, gastos e relatórios" : "Só registra vendas no caixa"}
                             </Text>
-                          </Pressable>
+                          </AnimatedPressable>
                         );
                       })}
                     </View>
@@ -289,7 +303,7 @@ export default function TeamScreen() {
 
               {actionsFor ? (
                 <>
-                  <Pressable
+                  <AnimatedPressable
                     className="flex-row items-center gap-3 rounded-xl bg-slate-50 p-3"
                     onPress={() => handleToggleRole(actionsFor)}
                   >
@@ -297,17 +311,17 @@ export default function TeamScreen() {
                     <Text className="text-[13px] font-medium text-ink">
                       {actionsFor.role === "gerente" ? "Tornar colaborador" : "Tornar gerente"}
                     </Text>
-                  </Pressable>
+                  </AnimatedPressable>
 
-                  <Pressable
+                  <AnimatedPressable
                     className="flex-row items-center gap-3 rounded-xl bg-slate-50 p-3"
                     onPress={() => handleResetPassword(actionsFor)}
                   >
                     <Ionicons name="key-outline" size={18} color="#0F172A" />
                     <Text className="text-[13px] font-medium text-ink">Redefinir senha</Text>
-                  </Pressable>
+                  </AnimatedPressable>
 
-                  <Pressable
+                  <AnimatedPressable
                     className="flex-row items-center gap-3 rounded-xl bg-red-50 p-3"
                     onPress={() => handleToggleStatus(actionsFor)}
                   >
@@ -319,7 +333,7 @@ export default function TeamScreen() {
                     <Text className="text-[13px] font-medium text-red-600">
                       {actionsFor.status === "ativo" ? "Desativar acesso" : "Reativar acesso"}
                     </Text>
-                  </Pressable>
+                  </AnimatedPressable>
                 </>
               ) : null}
 
