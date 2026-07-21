@@ -22,13 +22,13 @@ export function MetricCard({ label, value, icon, tone = "neutral" }: MetricCardP
   const currentTone = tones[tone];
 
   return (
-    <AnimatedPressable className="flex-1 rounded-2xl border border-line bg-white p-3">
+    <AnimatedPressable className="flex-1 rounded-xl border border-line bg-white p-2.5">
       <View className="flex-row items-center justify-between">
-        <Text className="text-[11px] font-semibold uppercase tracking-wide text-muted">{label}</Text>
+        <Text className="text-[10px] font-semibold uppercase tracking-wide text-muted">{label}</Text>
         {icon ? <AnimatedIconBadge icon={icon} size="sm" colors={currentTone.colors} /> : null}
       </View>
-      <Text className="mt-1.5 text-lg font-bold tracking-tight text-ink">{value}</Text>
-      <View className="mt-2 h-1 overflow-hidden rounded-full bg-slate-100">
+      <Text className="mt-1 text-base font-bold tracking-tight text-ink">{value}</Text>
+      <View className="mt-1.5 h-1 overflow-hidden rounded-full bg-slate-100">
         <View className={`h-full w-2/3 rounded-full ${currentTone.bar}`} />
       </View>
     </AnimatedPressable>

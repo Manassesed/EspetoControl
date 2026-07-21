@@ -132,36 +132,36 @@ export default function DashboardScreen() {
         colors={profit >= 0 ? ["#101828", "#0F766E", "#10B981"] : ["#101828", "#7F1D1D", "#EF4444"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className="overflow-hidden rounded-2xl p-4"
+        className="overflow-hidden rounded-2xl p-3.5"
       >
         <View className="flex-row items-start justify-between">
-          <View className="flex-1 pr-4">
-            <Text className="text-[11px] font-semibold uppercase tracking-wide text-emerald-50">Dinheiro no bolso hoje</Text>
-            <Text className="mt-1 text-3xl font-bold tracking-tight text-white">{formatCurrency(profit)}</Text>
-            <Text className="mt-1.5 text-[13px] leading-5 text-emerald-50">{insight}</Text>
+          <View className="flex-1 pr-3">
+            <Text className="text-[10px] font-semibold uppercase tracking-wide text-emerald-50">Dinheiro no bolso hoje</Text>
+            <Text className="mt-0.5 text-2xl font-bold tracking-tight text-white">{formatCurrency(profit)}</Text>
+            <Text className="mt-1 text-[12px] leading-4 text-emerald-50">{insight}</Text>
           </View>
           <AnimatedIconBadge
             icon={profit >= 0 ? "trending-up-outline" : "alert-circle-outline"}
-            size="md"
+            size="sm"
             colors={profit >= 0 ? ["#ECFDF5", "#10B981", "#064E3B"] : ["#FEE2E2", "#EF4444", "#7F1D1D"]}
           />
         </View>
-        <View className="mt-4 gap-2.5 rounded-xl bg-white/10 p-2.5">
+        <View className="mt-3 gap-2 rounded-xl bg-white/10 p-2">
           <View>
             <View className="mb-1 flex-row justify-between">
-              <Text className="text-[11px] font-semibold uppercase tracking-wide text-white">Vendeu</Text>
-              <Text className="text-[13px] font-bold text-white">{formatCurrency(totalSales)}</Text>
+              <Text className="text-[10px] font-semibold uppercase tracking-wide text-white">Vendeu</Text>
+              <Text className="text-[12px] font-bold text-white">{formatCurrency(totalSales)}</Text>
             </View>
-            <View className="h-2 overflow-hidden rounded-full bg-white/20">
+            <View className="h-1.5 overflow-hidden rounded-full bg-white/20">
               <View className="h-full rounded-full bg-white" style={{ width: `${Math.max(6, salesBarWidth)}%` }} />
             </View>
           </View>
           <View>
             <View className="mb-1 flex-row justify-between">
-              <Text className="text-[11px] font-semibold uppercase tracking-wide text-red-200">Gastou</Text>
-              <Text className="text-[13px] font-bold text-red-200">{formatCurrency(totalExpenses)}</Text>
+              <Text className="text-[10px] font-semibold uppercase tracking-wide text-red-200">Gastou</Text>
+              <Text className="text-[12px] font-bold text-red-200">{formatCurrency(totalExpenses)}</Text>
             </View>
-            <View className="h-2 overflow-hidden rounded-full bg-white/20">
+            <View className="h-1.5 overflow-hidden rounded-full bg-white/20">
               <View className="h-full rounded-full bg-red-400" style={{ width: `${Math.max(6, expenseBarWidth)}%` }} />
             </View>
           </View>
@@ -188,7 +188,7 @@ export default function DashboardScreen() {
 
       {detailsOpen ? (
         <>
-          <View className="rounded-2xl border border-line bg-white p-3.5">
+          <View className="rounded-2xl border border-line bg-white p-3">
             <View className="flex-row items-center justify-between">
               <View className="flex-1 pr-3">
                 <Text className="text-[13px] font-semibold text-ink">Proximo movimento</Text>
@@ -202,7 +202,7 @@ export default function DashboardScreen() {
             </View>
           </View>
 
-          <View className="rounded-2xl border border-line bg-white p-3.5">
+          <View className="rounded-2xl border border-line bg-white p-3">
             <View className="flex-row items-center justify-between">
               <Text className="text-[13px] font-semibold text-ink">Como o dinheiro entrou</Text>
               <AnimatedIconBadge icon="card-outline" size="sm" colors={["#CBD5E1", "#475569", "#0F172A"]} />
@@ -230,7 +230,7 @@ export default function DashboardScreen() {
             )}
           </View>
 
-          <View className="rounded-2xl border border-line bg-white p-3.5">
+          <View className="rounded-2xl border border-line bg-white p-3">
             <View className="flex-row items-center justify-between">
               <Text className="text-[13px] font-semibold text-ink">Gastos por categoria</Text>
               <AnimatedIconBadge icon="pie-chart-outline" size="sm" colors={["#FECACA", "#EF4444", "#7F1D1D"]} />
@@ -254,7 +254,7 @@ export default function DashboardScreen() {
             )}
           </View>
 
-          <View className="rounded-2xl border border-line bg-white p-3.5">
+          <View className="rounded-2xl border border-line bg-white p-3">
             <View className="flex-row items-center justify-between">
               <View>
                 <Text className="text-[13px] font-semibold text-ink">Mais vendidos</Text>
@@ -292,7 +292,7 @@ export default function DashboardScreen() {
             </View>
           </View>
 
-          <View className="mb-20 rounded-2xl border border-line bg-white p-3.5">
+          <View className="mb-20 rounded-2xl border border-line bg-white p-3">
             <View className="flex-row items-center justify-between">
               <View>
                 <Text className="text-[13px] font-semibold text-ink">Ultimos atendimentos</Text>
