@@ -186,9 +186,8 @@ export default function DashboardScreen() {
         <Ionicons name={detailsOpen ? "chevron-up" : "chevron-down"} size={18} color="#0F172A" />
       </Pressable>
 
-      {detailsOpen ? (
-        <>
-          <View className="rounded-2xl border border-line bg-white p-3">
+      <View className={detailsOpen ? "gap-2.5" : "hidden"}>
+        <View className="rounded-2xl border border-line bg-white p-3">
             <View className="flex-row items-center justify-between">
               <View className="flex-1 pr-3">
                 <Text className="text-[13px] font-semibold text-ink">Proximo movimento</Text>
@@ -328,10 +327,7 @@ export default function DashboardScreen() {
               ))}
             </View>
           </View>
-        </>
-      ) : (
-        <View className="mb-20" />
-      )}
+      </View>
 
       <Modal
         visible={Boolean(selectedSale)}
