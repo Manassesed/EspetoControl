@@ -2,14 +2,16 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { Redirect } from "expo-router";
 import { useState } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Modal, Pressable, RefreshControl, Text, View } from "react-native";
 
 import { CalendarModal } from "@/components/CalendarModal";
 import { Header } from "@/components/Header";
 import { AnimatedIconBadge } from "@/components/ui/AnimatedIconBadge";
+import { AnimatedPressable } from "@/components/ui/AnimatedPressable";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { Screen } from "@/components/ui/Screen";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/context/AuthContext";
 import { useAuthActions } from "@/hooks/useAuthActions";
 import { useDashboard } from "@/hooks/useDashboard";
@@ -48,6 +50,7 @@ export default function DashboardScreen() {
     }
   }
   const data = dashboard.data;
+  const isFirstLoad = dashboard.isLoading && !data;
 
   const paymentRows = Object.entries(data?.byPayment ?? {});
   const maxPayment = Math.max(...paymentRows.map(([, total]) => total), 1);
@@ -83,7 +86,16 @@ export default function DashboardScreen() {
   }
 
   return (
-    <Screen>
+    <Screen
+      refreshControl={
+        <RefreshControl
+          refreshing={dashboard.isFetching && !isFirstLoad}
+          onRefresh={() => dashboard.refetch()}
+          tintColor="#10B981"
+          colors={["#10B981"]}
+        />
+      }
+    >
       <Header
         title="Painel do dia"
         subtitle={profile ? `Olá, ${profile.nome}` : "Resumo do movimento"}
@@ -91,12 +103,12 @@ export default function DashboardScreen() {
       />
 
       <View className="flex-row items-center justify-between rounded-2xl border border-line bg-white px-1.5 py-0.5">
-        <Pressable
-          className="h-9 w-9 items-center justify-center rounded-xl"
+        <AnimatedPressable
+          className="h-10 w-10 items-center justify-center rounded-xl"
           onPress={goToPreviousDay}
         >
           <Ionicons name="chevron-back" size={18} color="#0F172A" />
-        </Pressable>
+        </AnimatedPressable>
 
         <Pressable onPress={() => setSelectedDate(new Date())} className="flex-1 items-center">
           <Text className="text-[13px] font-semibold text-ink">{formatDateLabel(selectedDate)}</Text>
@@ -105,20 +117,20 @@ export default function DashboardScreen() {
           )}
         </Pressable>
 
-        <Pressable
-          className={`h-9 w-9 items-center justify-center rounded-xl ${isToday(selectedDate) ? "opacity-30" : ""}`}
+        <AnimatedPressable
+          className={`h-10 w-10 items-center justify-center rounded-xl ${isToday(selectedDate) ? "opacity-30" : ""}`}
           onPress={goToNextDay}
           disabled={isToday(selectedDate)}
         >
           <Ionicons name="chevron-forward" size={18} color="#0F172A" />
-        </Pressable>
+        </AnimatedPressable>
 
-        <Pressable
-          className="ml-1 h-9 w-9 items-center justify-center rounded-xl border border-line"
+        <AnimatedPressable
+          className="ml-1 h-10 w-10 items-center justify-center rounded-xl border border-line"
           onPress={() => setCalendarVisible(true)}
         >
           <Ionicons name="calendar-outline" size={17} color="#0F172A" />
-        </Pressable>
+        </AnimatedPressable>
       </View>
 
       <CalendarModal
@@ -128,6 +140,23 @@ export default function DashboardScreen() {
         onClose={() => setCalendarVisible(false)}
       />
 
+      {isFirstLoad ? (
+        <View className="gap-2.5">
+          <Skeleton className="h-[128px] w-full" />
+          <View className="flex-row gap-2">
+            <Skeleton className="h-[72px] flex-1 rounded-xl" />
+            <Skeleton className="h-[72px] flex-1 rounded-xl" />
+          </View>
+          <View className="flex-row gap-2">
+            <Skeleton className="h-[72px] flex-1 rounded-xl" />
+            <Skeleton className="h-[72px] flex-1 rounded-xl" />
+          </View>
+          <Skeleton className="h-11 w-full" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-28 w-full" />
+        </View>
+      ) : (
+        <>
       <LinearGradient
         colors={profit >= 0 ? ["#101828", "#0F766E", "#10B981"] : ["#101828", "#7F1D1D", "#EF4444"]}
         start={{ x: 0, y: 0 }}
@@ -178,13 +207,13 @@ export default function DashboardScreen() {
         <MetricCard label="Atendimentos" value={String(salesCount)} icon="people-outline" />
       </View>
 
-      <Pressable
+      <AnimatedPressable
         className="flex-row items-center justify-between rounded-2xl border border-line bg-white px-3.5 py-3"
         onPress={() => setDetailsOpen((v) => !v)}
       >
         <Text className="text-[13px] font-semibold text-ink">{detailsOpen ? "Ocultar detalhes do dia" : "Ver detalhes do dia"}</Text>
         <Ionicons name={detailsOpen ? "chevron-up" : "chevron-down"} size={18} color="#0F172A" />
-      </Pressable>
+      </AnimatedPressable>
 
       <View className={detailsOpen ? "gap-2.5" : "hidden"}>
         <View className="rounded-2xl border border-line bg-white p-3">
@@ -302,7 +331,7 @@ export default function DashboardScreen() {
 
             <View className="mt-2.5 gap-1.5">
               {saleDetails.map((sale) => (
-                <Pressable
+                <AnimatedPressable
                   key={sale.id}
                   className="flex-row items-center justify-between rounded-xl bg-slate-50 p-2"
                   onPress={() => {
@@ -323,11 +352,13 @@ export default function DashboardScreen() {
                   </View>
                   <Text className="text-[13px] font-bold text-brand-700">{formatCurrency(sale.valor_total)}</Text>
                   <Ionicons name="chevron-forward" size={14} color="#94A3B8" style={{ marginLeft: 6 }} />
-                </Pressable>
+                </AnimatedPressable>
               ))}
             </View>
           </View>
       </View>
+        </>
+      )}
 
       <Modal
         visible={Boolean(selectedSale)}
