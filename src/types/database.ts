@@ -1,10 +1,20 @@
 export type PaymentMethod = "pix" | "dinheiro" | "cartao_credito" | "cartao_debito";
 
+export type SubscriptionStatus = "trial" | "active" | "past_due" | "canceled" | "lifetime";
+
 export type Empresa = {
   id: string;
   nome: string;
   created_at: string;
+  subscription_status: SubscriptionStatus;
+  trial_ends_at: string;
+  mp_preapproval_id: string | null;
+  mp_payer_email: string | null;
+  subscription_updated_at: string;
 };
+
+/** Projeção só com os campos que o gate de acesso e a tela de assinatura precisam. */
+export type EmpresaSubscription = Pick<Empresa, "subscription_status" | "trial_ends_at" | "mp_preapproval_id">;
 
 export type AccessRole = "gerente" | "colaborador";
 export type MemberStatus = "pendente" | "ativo" | "inativo";
@@ -103,7 +113,15 @@ export type Database = {
     Tables: {
       empresas: {
         Row: Empresa;
-        Insert: Pick<Empresa, "nome"> & { id?: string; created_at?: string };
+        Insert: Pick<Empresa, "nome"> & {
+          id?: string;
+          created_at?: string;
+          subscription_status?: SubscriptionStatus;
+          trial_ends_at?: string;
+          mp_preapproval_id?: string | null;
+          mp_payer_email?: string | null;
+          subscription_updated_at?: string;
+        };
         Update: Partial<Empresa>;
         Relationships: [];
       };

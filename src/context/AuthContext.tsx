@@ -1,10 +1,11 @@
 import type { Session } from "@supabase/supabase-js";
 import { createContext, type PropsWithChildren, useContext, useEffect, useMemo, useRef, useState } from "react";
 
-import { demoProfile } from "@/constants/demo";
+import { demoProfile, isDemoCompany } from "@/constants/demo";
+import { getEmpresaSubscription } from "@/services/empresaService";
 import { loadProfileForUser } from "@/services/profileService";
 import { supabase } from "@/services/supabase";
-import type { Usuario } from "@/types/database";
+import type { EmpresaSubscription, Usuario } from "@/types/database";
 
 type AuthContextValue = {
   session: Session | null;
@@ -12,8 +13,10 @@ type AuthContextValue = {
   profileError: string | null;
   loading: boolean;
   demoMode: boolean;
+  empresaSubscription: EmpresaSubscription | null;
   startDemo: () => void;
   refreshProfile: () => Promise<void>;
+  refreshEmpresaSubscription: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -24,6 +27,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [profileError, setProfileError] = useState<string | null>(null);
   const [demoMode, setDemoMode] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [empresaSubscription, setEmpresaSubscription] = useState<EmpresaSubscription | null>(null);
 
   const demoModeRef = useRef(false);
   const profileRef = useRef<Usuario | null>(null);
@@ -39,6 +43,22 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setLoading(false);
   }
 
+  // Busca o status de assinatura da empresa. Falha silenciosa (mantém o
+  // valor anterior): um problema transitório aqui não deve travar o login
+  // de quem já passou pela checagem principal do perfil.
+  async function loadEmpresaSubscription(p: Usuario) {
+    if (isDemoCompany(p.empresa_id)) {
+      setEmpresaSubscription(null);
+      return;
+    }
+    try {
+      const sub = await getEmpresaSubscription(p.empresa_id);
+      setEmpresaSubscription(sub);
+    } catch {
+      // silencioso — não bloqueia o fluxo de login por causa disso
+    }
+  }
+
   async function fetchAndApplyProfile(s: Session) {
     const p = await loadProfileForUser(
       s.user.id,
@@ -46,7 +66,14 @@ export function AuthProvider({ children }: PropsWithChildren) {
       s.user.user_metadata
     );
     applyProfile(p);
+    if (p) await loadEmpresaSubscription(p);
     return p;
+  }
+
+  async function refreshEmpresaSubscription() {
+    const p = profileRef.current;
+    if (!p) return;
+    await loadEmpresaSubscription(p);
   }
 
   // Guard contra cargas concorrentes. Usado pelo bootstrap e pelos eventos de auth.
@@ -85,6 +112,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setDemoMode(true);
     setSession(null);
     applyProfile(demoProfile);
+    setEmpresaSubscription(null);
     setLoading(false);
   }
 
@@ -147,8 +175,18 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, []);
 
   const value = useMemo(
-    () => ({ session, profile, profileError, loading, demoMode, startDemo, refreshProfile }),
-    [session, profile, profileError, loading, demoMode]
+    () => ({
+      session,
+      profile,
+      profileError,
+      loading,
+      demoMode,
+      empresaSubscription,
+      startDemo,
+      refreshProfile,
+      refreshEmpresaSubscription
+    }),
+    [session, profile, profileError, loading, demoMode, empresaSubscription]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

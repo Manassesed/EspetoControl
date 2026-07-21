@@ -4,6 +4,7 @@ import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAuth } from "@/context/AuthContext";
+import { isSubscriptionBlocked } from "@/utils/subscription";
 
 type TabIconProps = {
   focused: boolean;
@@ -23,7 +24,7 @@ function TabIcon({ focused, icon }: TabIconProps) {
 }
 
 export default function TabsLayout() {
-  const { session, profile, loading, demoMode } = useAuth();
+  const { session, profile, loading, demoMode, empresaSubscription } = useAuth();
   const insets = useSafeAreaInsets();
 
   if (!loading && !session && !demoMode) {
@@ -33,6 +34,12 @@ export default function TabsLayout() {
   // Convite aceito mas senha ainda não definida: trava tudo até concluir o onboarding.
   if (profile?.status === "pendente") {
     return <Redirect href="/auth/set-password" />;
+  }
+
+  // Trial vencido ou assinatura em atraso/cancelada: trava o app inteiro
+  // (gerente e colaborador) até a empresa assinar de novo.
+  if (isSubscriptionBlocked(empresaSubscription)) {
+    return <Redirect href="/assinatura" />;
   }
 
   // Colaborador só vê o caixa; gerente vê tudo, incluindo a equipe.

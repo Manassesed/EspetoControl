@@ -108,7 +108,13 @@ export default function RegisterScreen() {
             )}
           />
 
-          <Button title="Cadastrar" icon="person-add-outline" loading={register.isPending} onPress={form.handleSubmit(onSubmit)} />
+          <Button
+            title="Começar teste grátis de 30 dias"
+            icon="person-add-outline"
+            loading={register.isPending}
+            onPress={form.handleSubmit(onSubmit)}
+          />
+          <Text className="text-center text-[12px] text-muted">Sem cartão de crédito. Cancele quando quiser.</Text>
           {env.enableDemo ? (
             <Button title="Ver demo sem cadastro" icon="sparkles-outline" variant="ghost" onPress={openDemo} />
           ) : null}

@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { router } from "expo-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Modal, Pressable, Text, View } from "react-native";
@@ -13,6 +14,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTeam, useTeamMutations } from "@/hooks/useTeam";
 import { type InviteForm, inviteSchema } from "@/lib/schemas";
 import type { AccessRole, Usuario } from "@/types/database";
+import { daysLeftInTrial } from "@/utils/subscription";
 
 const statusLabel: Record<Usuario["status"], string> = {
   ativo: "Ativo",
@@ -78,6 +80,39 @@ function MemberRow({
   );
 }
 
+function SubscriptionBanner() {
+  const { empresaSubscription } = useAuth();
+  if (!empresaSubscription) return null;
+
+  const { subscription_status } = empresaSubscription;
+  const daysLeft = daysLeftInTrial(empresaSubscription);
+
+  const label =
+    subscription_status === "trial"
+      ? `Teste grátis: ${daysLeft} dia(s) restante(s)`
+      : subscription_status === "active"
+        ? "Assinatura ativa"
+        : subscription_status === "lifetime"
+          ? "Plano vitalício"
+          : "Assinatura pendente";
+
+  const tone = subscription_status === "trial" ? "bg-amber-50" : "bg-emerald-50";
+  const textTone = subscription_status === "trial" ? "text-amber-700" : "text-emerald-700";
+
+  return (
+    <Pressable
+      className={`flex-row items-center justify-between rounded-2xl p-3.5 ${tone}`}
+      onPress={() => router.push("/assinatura")}
+    >
+      <View className="flex-row items-center gap-2">
+        <Ionicons name="card-outline" size={17} color="#0F172A" />
+        <Text className={`text-[13px] font-semibold ${textTone}`}>{label}</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={16} color="#0F172A" />
+    </Pressable>
+  );
+}
+
 export default function TeamScreen() {
   const { profile } = useAuth();
   const team = useTeam(profile?.empresa_id);
@@ -140,6 +175,8 @@ export default function TeamScreen() {
     <ManagerGate>
       <Screen>
         <Header title="Minha equipe" subtitle="Convide e gerencie quem acessa o app" actionLabel="Convidar" onAction={openInvite} />
+
+        <SubscriptionBanner />
 
         <View className="gap-2">
           {team.isLoading ? (
