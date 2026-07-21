@@ -1,7 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { LinearGradient } from "expo-linear-gradient";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
+import { AnimatedIconBadge } from "@/components/ui/AnimatedIconBadge";
 import { Button } from "@/components/ui/Button";
 import { Screen } from "@/components/ui/Screen";
 import { useAuth } from "@/context/AuthContext";
@@ -23,37 +23,36 @@ export default function AssinaturaScreen() {
 
   return (
     <Screen scroll={false}>
-      <View className="flex-1 items-center justify-center gap-6">
-        <LinearGradient
-          colors={["#111827", "#1E3A8A", "#10B981"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          className="w-full rounded-2xl p-5"
-        >
-          <View className="items-center gap-2">
-            <Ionicons name="lock-closed-outline" size={28} color="#FFFFFF" />
-            <Text className="text-center text-lg font-bold text-white">
-              {isTrialActive ? `Faltam ${daysLeft} dia(s) de teste grátis` : "Assinatura necessária"}
-            </Text>
-            <Text className="text-center text-[13px] text-emerald-50">
-              {isTrialActive
-                ? "Assine agora e continue usando sem interrupção quando o teste acabar."
-                : "O teste grátis acabou ou a assinatura está em atraso. Assine pra continuar usando o EspetoControl."}
-            </Text>
-          </View>
-        </LinearGradient>
+      <View className="flex-1 items-center justify-center gap-4 px-2">
+        <AnimatedIconBadge icon="lock-closed-outline" size="lg" colors={["#0F172A", "#1E3A8A", "#10B981"]} />
 
-        <View className="w-full items-center gap-1.5 rounded-2xl border border-line bg-white p-5">
-          <Text className="text-[13px] font-semibold uppercase tracking-wide text-muted">Plano mensal</Text>
-          <Text className="text-3xl font-bold text-ink">{MONTHLY_PRICE_LABEL}</Text>
-          <Text className="text-center text-[13px] text-muted">Cancele quando quiser, direto pelo Mercado Pago.</Text>
+        <View className="items-center gap-1">
+          <Text className="text-center text-[16px] font-bold text-ink">
+            {isTrialActive ? `Faltam ${daysLeft} dia(s) de teste grátis` : "Assinatura necessária"}
+          </Text>
+          <Text className="max-w-[260px] text-center text-[12.5px] text-muted">
+            {isTrialActive
+              ? "Assine agora e continue usando sem interrupção quando o teste acabar."
+              : "O teste grátis acabou ou a assinatura está em atraso. Assine pra continuar usando o EspetoControl."}
+          </Text>
+        </View>
+
+        <View className="w-full max-w-[280px] flex-row items-center justify-between gap-3 rounded-2xl border border-line bg-white px-4 py-3">
+          <View className="h-9 w-9 items-center justify-center rounded-full bg-brand-50">
+            <Ionicons name="card-outline" size={16} color="#059669" />
+          </View>
+          <View className="flex-1">
+            <Text className="text-[10px] font-semibold uppercase tracking-wide text-muted">Plano mensal</Text>
+            <Text className="text-lg font-bold text-ink">{MONTHLY_PRICE_LABEL}</Text>
+          </View>
+          <Text className="text-[10.5px] text-muted">Cancele{"\n"}quando quiser</Text>
         </View>
 
         {isManager ? (
-          <View className="w-full gap-2">
+          <View className="w-full max-w-[280px] gap-2">
             {checkout.isError ? (
-              <View className="rounded-xl bg-red-50 px-4 py-2.5">
-                <Text className="text-center text-[13px] font-semibold text-red-600">
+              <View className="rounded-xl bg-red-50 px-3 py-2">
+                <Text className="text-center text-[12px] font-semibold text-red-600">
                   {checkout.error instanceof Error ? checkout.error.message : "Não foi possível abrir o checkout."}
                 </Text>
               </View>
@@ -66,15 +65,17 @@ export default function AssinaturaScreen() {
             />
           </View>
         ) : (
-          <View className="w-full items-center gap-2 rounded-xl bg-amber-50 p-4">
-            <Ionicons name="information-circle-outline" size={20} color="#92400E" />
-            <Text className="text-center text-[13px] font-medium text-amber-800">
+          <View className="w-full max-w-[280px] items-center gap-1.5 rounded-xl bg-amber-50 px-4 py-3">
+            <Ionicons name="information-circle-outline" size={18} color="#92400E" />
+            <Text className="text-center text-[12px] font-medium text-amber-800">
               A assinatura da empresa venceu. Peça pro gerente renovar pra voltar a usar o app.
             </Text>
           </View>
         )}
 
-        <Button title="Sair" variant="secondary" onPress={() => logout.mutate()} />
+        <Pressable onPress={() => logout.mutate()} className="py-1.5">
+          <Text className="text-center text-[13px] font-semibold text-muted">Sair</Text>
+        </Pressable>
       </View>
     </Screen>
   );
